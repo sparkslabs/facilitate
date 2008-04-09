@@ -45,14 +45,6 @@ class Functional(object):
         start_response(status,headers)
         return [ page ]
 
-
-                # Do we really prefer this to be:
-                # status, headers, page = callback(**args,environ=environ)
-
-                # HA! The content is actually TYPED.
-                    # Go one stage further - what if the TYPE was more complex - but more akin to an object reference?
-                # Actually want STATUS, mimetype, data as well.
-
 class EnvironDumper(object):
     def __call__(self, environ, start_response):
         start_response('200 OK',[('Content-type','text/html')])
@@ -142,13 +134,3 @@ if __name__ == "__main__":
     from wsgiref.handlers import CGIHandler
     CGIHandler().run( CGI_Parser( JSON_Interceptor( EnvironDumper() ) ) )
 
-"""
-http://127.0.0.1/cgi-bin/app/people
-http://127.0.0.1/cgi-bin/app/bbcwsgitools.py
-http://127.0.0.1/cgi-bin/app/bbcwsgitools.py?hello=world
-http://zetazeros.wordpress.com/2008/01/28/thesis-database-and-python-cgi-uploading/
-http://www.google.com/search?num=100&hl=en&safe=off&client=firefox-a&rls=org.mozilla%3Aen-GB%3Aofficial&hs=VxG&q=%2Bpython+cgi+handle+%22large+file%22+upload&btnG=Search
-http://wiki.pylonshq.com/display/pylonsdocs/Form+Handling
-http://pythonpaste.org/
-http://www.python.org/dev/peps/pep-0333/
-"""
