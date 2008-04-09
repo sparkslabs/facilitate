@@ -1,44 +1,13 @@
 #def $banner: Participate App V0
-#def $peopleappurl: /cgi-bin/app/people
-#def $itemsappurl: /cgi-bin/app/items
-#def $items_peopleappurl: /cgi-bin/app/items_people
 #def $missionsappurl: /cgi-bin/app/missions
-#def $missionsstepsappurl: /cgi-bin/app/missionsteps
-#def $wizardsappurl: /cgi-bin/app/wizards
-
-#def $addpersonurl: $peopleappurl?formtype=edit_new_person
-#def $addperson: <a href="$addpersonurl">Add</a>
-#def $peoplehomelink: <a href="$peopleappurl">Home</a>
-
-#def $additemurl: $itemsappurl?formtype=edit_new
-#def $additem: <a href="$additemurl">Add</a>
-#def $itemshomelink: <a href="$itemsappurl">Home</a>
-
-#def $additem_personurl: $items_peopleappurl?formtype=edit_new
-#def $additem_person: <a href="$additem_personurl">Add</a>
-#def $items_peoplehomelink: <a href="$items_peopleappurl">Home</a>
 
 #def $addmissionurl: $missionsappurl?formtype=edit_new
 #def $addmission: <a href="$addmissionurl">Add</a>
 #def $missionshomelink: <a href="$missionsappurl">Home</a>
 
-#def $addmissionsstepurl: $missionsstepsappurl?formtype=edit_new
-#def $addmissionstep: <a href="$addmissionsstepurl">Add</a>
-#def $missionsstepshomelink: <a href="$missionsstepsappurl">Home</a>
-
-#def $addsimplemissionurl: $wizardsappurl?formtype=edit_new_simplemission&amp;steps=5
-#def $addsimplemission: <a href="$addsimplemissionurl">Simple Mission</a>
-#def $authoringapphomelink: <a href="$wizardsappurl">Home</a>
-
-
 #def $pretext:
 <table><tr>
-<td align="center" style="border: 3px solid; padding: 8;"> People<br>($peoplehomelink | $addperson ) </td>
-<td align="center" style="border: 3px solid; padding: 8;"> Items<br>( $itemshomelink | $additem ) </td>
-<td align="center" style="border: 3px solid; padding: 8;"> ItemPerson<br>( $items_peoplehomelink | $additem_person ) </td>
 <td align="center" style="border: 3px solid; padding: 8;"> Mission<br>($missionshomelink | $addmission) </td>
-<td align="center" style="border: 3px solid; padding: 8;"> Mission Step<br>($missionsstepshomelink | $addmissionstep ) </td>
-<td align="center" style="border: 3px solid; padding: 8;"> Wizards<br>($authoringapphomelink | $addsimplemission ) </td>
 </tr></table>
 #end def
 #def $content: <p>
