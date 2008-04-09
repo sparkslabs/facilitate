@@ -1,5 +1,10 @@
 #def $banner: Participate App V0
+
+## NOTE: If you add a top level script you add a new <scriptname>appurl here
+
 #def $missionsappurl: /cgi-bin/app/missions
+
+## NOTE: Similarly, you need to define the links for adding <entities a the app home>
 
 #def $addmissionurl: $missionsappurl?formtype=edit_new
 #def $addmission: <a href="$addmissionurl">Add</a>
@@ -7,6 +12,9 @@
 
 #def $pretext:
 <table><tr>
+
+## NOTE: In this table you would add an extra <td> line, customised for your entity
+
 <td align="center" style="border: 3px solid; padding: 8;"> Mission<br>($missionshomelink | $addmission) </td>
 </tr></table>
 #end def
@@ -27,43 +35,5 @@ $dataentry
 <hr>
 $extra
 <hr>
-<!--
-<P>
-<B> Base mission flag needs adding to Mission <br>
-Editting of record attributes for uploads should not clobber the upload as it presently does </b>
-<P>
-<B>Need to update this such that the "update" template makes it much clearer you're editting a record, rather than creating a new one.</B>
-<P> Note that the code has been refactored somewhat to simplify extension to other datatypes whilst allowing code specific stuff to occur. Further refactoring is needed after we complete showing &amp; making relations, along with the aspect of subset viewing, creation &amp; update. Certainly a start however.
-<P><i> OK, next steps:
-<ul>
-    <li> Need to handle upload of BLOBs...
-    <ul>
-        <li> Can handle now uploads of several pictures at once into the collab platform
-        <li> Stored in /tmp/uploads/<i>number</i>
-        <ul>
-            Moved to CWD/uploads for now - will need to be reconfigurable
-        </ul>
-        <li> Also in environ["bbc.args"] as "field" &amp; &lt;field&gt;.__filename pairs.
-        <li> Needs thinking about slightly more there, but that works pretty well for something hardcoded.
-    </ul>
-    <li> Now need to add in a way to view the uploaded content - which goes a long way to the next 2 points
-    <ul>
-        <li> Have basic viewing of content now sorted, but will need placing behind some protection
-        <li> That shouldn't be an issue though?
-    </ul>
-    <li> Update item needs to *replace* the existing file.
-    <ul>
-        <li> Check that this really is happening correctly. (Not clear)
-        <li> Actually, we know that updating of blobs is bust - find out why.
-        <li> Need to constructively handle empty files too.
-    </ul>
-    <li> A database based around BLOBS (contributed data)
-    <li> A database around BLOBS with metadata
-    <li> A database of associations between the Blobby database and the person database.
-    <li> Then will need to handle deletion of blobs &amp; content properly.
-</ul>
-</i>
-<P> hello
--->
 </body>
 </html>
