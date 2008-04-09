@@ -3,8 +3,10 @@
 from Cheetah.Template import Template
 from model.Record import EntitySet
 
+# NOTE: You would rename "Missions" here to match your entity set's name
 MissionsDatabase = EntitySet("missions",key="missionid")
 
+# NOTE: Likewise, rather than MissionsDatabase, this would be your entity's name
 def store_new_mission(the_mission): return MissionsDatabase.new_record(the_mission)
 def read_database(): return MissionsDatabase.read_database()
 def store_mission(mission): return MissionsDatabase.store_record(mission)
@@ -15,6 +17,20 @@ def delete_mission(mission): return MissionsDatabase.delete_record(mission)
 # Map web request to data layer
 #
 
+# NOTE: This is our constructor for new entities.
+# NOTE: You can create an "empty" mission by doing this, and customise
+# NOTE: it this way:
+# NOTE:    aMission = make_mission()
+# NOTE:    aMission["mission"] = "..."
+# NOTE:    aMission["shortdescription"] = "invade a planet"
+# NOTE:    aMission["mediumdescription"] = "..."
+#
+# NOTE: However the changes to "aMission" above are NOT persistent.
+#
+# NOTE: In order to store updates to disk you would need to do this:
+#
+# NOTE: store_mission(aMission)
+#
 def make_mission(stem="form", **argd):
     new_mission = {
         "mission" : argd.get(stem + ".mission",""),
@@ -28,6 +44,16 @@ def make_mission(stem="form", **argd):
 
 #
 # Map web request to data layer
+#
+# NOTE: update_mission is used grab a record from a form (in argd)
+# NOTE: and then to write this to disk.
+#
+# NOTE: This, along with make_mission are candidate locationss for
+# NOTE: *using* data validation. 
+#
+# Other: Ideally this stuff should really be
+# Other: enforced, located inside Record which gets subclassed for
+# Other: configuration.
 #
 
 def update_mission(stem="form", **argd):
@@ -43,17 +69,23 @@ def update_mission(stem="form", **argd):
     return the_mission
 
 
+# NOTE: You have to customise the template names here
 
 class RecordRender(object):
     record_listview_template = 'templates/Missions.View.tmpl'
     record_editget_template = 'templates/Mission.Edit.tmpl'
     record_view_template = 'templates/Mission.View.tmpl'
-    record_editpost_template = 'templates/Form.tmpl'         # Actually to do with a configured form isn't it...
-    page_template = 'templates/Page.tmpl'
+
+    record_editpost_template = 'templates/Form.tmpl' # NOTE: Generally does not need changing
+    page_template = 'templates/Page.tmpl'            # NOTE: Generally does not need changing
 
     def __init__(self, environ,**argd):
         self.environ = environ
         self.__dict__.update(argd)
+
+
+# NOTE: the key here "missions" refers to a value in Missions.View.tmpl
+# NOTE: So they *at present* need keeping in step. This will be simplified.
 
     def rendered_record_list(self, addresses):
         missions = Template ( file = self.record_listview_template,
@@ -95,47 +127,14 @@ class RecordRender(object):
                                   }
                               ] ))
 
-
-if 0:
-    #
-    # Presentation Layer - various aspects of complexity
-    #
-
-    def rendered_record_list(addresses):
-        missions = Template ( file = 'templates/Missions.View.tmpl',
-                            searchList = [{"missions" : addresses}] )
-        return missions
-
-    def rendered_record_entry_form(mission):
-        dataentry = Template ( file = 'templates/Mission.Edit.tmpl', searchList = [mission] )
-        return dataentry
-
-    def rendered_mission(mission):
-        dataentry = Template ( file = 'templates/Mission.View.tmpl', searchList = [mission] )
-        return dataentry
-
-    def render_configured_form(pre_filled_data_entry,nextstep="create_new"):
-        configured_form = Template ( file = 'templates/Form.tmpl', 
-                                     searchList = [{
-                                           "formbody":pre_filled_data_entry,
-                                           "formtype":nextstep,
-                                                  }]
-                                   )
-        return configured_form
-
-    def render_page(content="", extra="", dataentry="", environ={}):
-        return str(Template ( file = 'templates/Page.tmpl',
-                             searchList = [
-                                  environ,
-                                  {
-                                    "extra": extra ,
-                                    "content" : content,
-                                    "dataentry" : dataentry,
-                                  }
-                              ] ))
-
 #
-# Actually _Mission_ Life Cycle Logic
+# Actually _Entity_ Life Cycle Logic
+#
+
+# NOTE: How you customise this depends on your entities. Ideally you will
+# NOTE: at present just update this by changing entity & entity set names.
+#
+# NOTE: Yes, this is intended to be configurable.
 #
 
 def page_render_html(json, **argd):
@@ -169,7 +168,7 @@ def page_render_html(json, **argd):
         pre_filled_data_entry = R.rendered_record_entry_form(new_mission)
         configured_form       = R.render_configured_form(pre_filled_data_entry,
                                                        nextstep="update_mission",
-                                                       )
+                                                      )
         return R.render_page(content=missions, dataentry=configured_form)
 
     if action == "view_mission":
