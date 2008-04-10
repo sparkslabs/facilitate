@@ -122,7 +122,6 @@ def RenderedRelation(R, LeftDB, RightDB):
     for person in People:
         Y[person[RightDB.key()]] = person
 
-#    return "people"+str(X)+str(Y)
     people                = R.rendered_record_list(addresses, X, Y)
     return people
 
@@ -169,30 +168,30 @@ def page_render_html(json, **argd):
     R = RelationRender(argd["__environ__"])
 
     if action == "overview":
-        people = str(RenderedRelation(R, ItemsDatabase, PeopleDatabase))
+        rendered_items_people = str(RenderedRelation(R, ItemsDatabase, PeopleDatabase))
 
-        X = R.render_page(content=people)
+        X = R.render_page(content=rendered_items_people)
         return X
 
     if action == "view":
 
-        people = RenderedRelation(R, ItemsDatabase, PeopleDatabase)
+        rendered_items_people = RenderedRelation(R, ItemsDatabase, PeopleDatabase)
         rendered_tuple = RenderedTuple(argd["__environ__"],"itempersonid", argd["itempersonid"], ItemsDatabase, PeopleDatabase)
 
-        return R.render_page(content=people, dataentry=rendered_tuple)
+        return R.render_page(content=rendered_items_people, dataentry=rendered_tuple)
 
     if action == "edit_new":
-        people = RenderedRelation(R, ItemsDatabase, PeopleDatabase)
+        rendered_items_people = RenderedRelation(R, ItemsDatabase, PeopleDatabase)
 
         empty_data_entry = RenderedRelationEntryForm( argd["__environ__"], "Items", "People", ItemsDatabase, PeopleDatabase)
         configured_form  = R.render_configured_form(empty_data_entry,submitlabel="Add Item")
 
-        return R.render_page(content=people, dataentry=configured_form)
+        return R.render_page(content=rendered_items_people, dataentry=configured_form)
 
     if action == "edit":
         item_person = get_item(argd["itempersonid"])
 
-        people = RenderedRelation(R, ItemsDatabase, PeopleDatabase)
+        rendered_items_people = RenderedRelation(R, ItemsDatabase, PeopleDatabase)
 
         pre_filled_data_entry = RenderedRelationEntryForm( argd["__environ__"], "Items", "People", ItemsDatabase, PeopleDatabase,
                                                # This next bit prevents reuse...
@@ -205,17 +204,17 @@ def page_render_html(json, **argd):
                                                        nextstep="update",
                                                        submitlabel="Update Item",
                                                        )
-        return R.render_page(content=people, dataentry=configured_form)
+        return R.render_page(content=rendered_items_people, dataentry=configured_form)
 
     if action == "create_new":
 
         new_item = make_item(stem="form", **argd) # This also stores them in the database
 
-        people = RenderedRelation(R, ItemsDatabase, PeopleDatabase)
+        rendered_items_people = RenderedRelation(R, ItemsDatabase, PeopleDatabase)
         rendered_tuple = RenderedTuple(argd["__environ__"],"itempersonid", new_item["itempersonid"], ItemsDatabase, PeopleDatabase)
         rendered_tuple = "<B> Record Saved </B>. If you wish to update, please do" + str(rendered_tuple)
 
-        return R.render_page(content=people, dataentry=rendered_tuple)
+        return R.render_page(content=rendered_items_people, dataentry=rendered_tuple)
 
     if action == "update":
         # Take the data sent to us, and use that to fill out an edit form
@@ -226,11 +225,11 @@ def page_render_html(json, **argd):
         #
         theitem = update_item(stem="form", **argd)
 
-        people = RenderedRelation(R, ItemsDatabase, PeopleDatabase)
+        rendered_items_people = RenderedRelation(R, ItemsDatabase, PeopleDatabase)
         rendered_tuple = RenderedTuple(argd["__environ__"],"itempersonid", theitem["itempersonid"], ItemsDatabase, PeopleDatabase)
         rendered_tuple = "<B> Record Saved </B>. If you wish to update, please do" + str(rendered_tuple)
 
-        return R.render_page(content=people, dataentry=rendered_tuple)
+        return R.render_page(content=rendered_items_people, dataentry=rendered_tuple)
 
     if action == "delete_item":
         # Take the data sent to us, and use that to fill out an edit form
@@ -241,7 +240,7 @@ def page_render_html(json, **argd):
         #
         # Show the database & a few options
         item = get_item(argd["itempersonid"])
-        people = RenderedRelation(R, ItemsDatabase, PeopleDatabase)
+        rendered_items_people = RenderedRelation(R, ItemsDatabase, PeopleDatabase)
 
         item_rendered = RenderedTuple(argd["__environ__"],"itempersonid", item["itempersonid"], ItemsDatabase, PeopleDatabase)
 
@@ -251,7 +250,7 @@ def page_render_html(json, **argd):
 
         delete_message = "%s <ul> %s </ul><h3> %s | %s </h3>" % (prebanner, str(item_rendered), delete_action, cancel_action)
 
-        return R.render_page(content=people, dataentry=delete_message)
+        return R.render_page(content=rendered_items_people, dataentry=delete_message)
 
     if action == "confirm_delete":
         # Show the database & a few options
@@ -260,9 +259,9 @@ def page_render_html(json, **argd):
 
         delete_item(argd["itempersonid"])
 
-        people = RenderedRelation(R, ItemsDatabase, PeopleDatabase)
+        rendered_items_people = RenderedRelation(R, ItemsDatabase, PeopleDatabase)
 
-        return R.render_page(content=people, dataentry="<h1> Record %s Deleted </h1>" % argd["itempersonid"])
+        return R.render_page(content=rendered_items_people, dataentry="<h1> Record %s Deleted </h1>" % argd["itempersonid"])
 
     return str(Template ( file = 'templates/Page.tmpl', 
                          searchList = [
