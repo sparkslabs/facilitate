@@ -58,9 +58,9 @@ class RecordRender(object):
     def __init__(self, environ):
         self.environ = environ
 
-    def rendered_record_list(self, addresses):
+    def rendered_record_list(self, people):
         people = Template ( file = self.record_listview_template,
-                            searchList = [self.environ, {"people": addresses}] )
+                            searchList = [self.environ, {"people": people}] )
         return people
 
     def rendered_record_entry_form(self, item):
@@ -99,43 +99,6 @@ class RecordRender(object):
                               ] ))
 
 
-if 0:
-    #
-    # Presentation Layer - various aspects of complexity
-    #
-
-    def rendered_record_list(addresses):
-        people = Template ( file = 'templates/People.View.tmpl',
-                            searchList = [{"people" : addresses}] )
-        return people
-
-    def rendered_record_entry_form(person):
-        dataentry = Template ( file = 'templates/Person.Edit.tmpl', searchList = [person] )
-        return dataentry
-
-    def rendered_person(person):
-        dataentry = Template ( file = 'templates/Person.View.tmpl', searchList = [person] )
-        return dataentry
-
-    def render_configured_form(pre_filled_data_entry,nextstep="create_new"):
-        configured_form = Template ( file = 'templates/Form.tmpl', 
-                                     searchList = [{
-                                           "formbody":pre_filled_data_entry,
-                                           "formtype":nextstep,
-                                                  }]
-                                   )
-        return configured_form
-
-    def render_page(content="", extra="", dataentry="", environ={}):
-        return str(Template ( file = 'templates/Page.tmpl',
-                             searchList = [
-                                  environ,
-                                  {
-                                    "extra": extra ,
-                                    "content" : content,
-                                    "dataentry" : dataentry,
-                                  }
-                              ] ))
 
 #
 # Actually _Person_ Life Cycle Logic
@@ -146,18 +109,18 @@ def page_render_html(json, **argd):
     R = RecordRender(argd["__environ__"])
     if action == "overview":
         # Show the database & a few options
-        addresses = read_database()
-        people                = R.rendered_record_list(addresses)
-        return R.render_page(content=people)
+        people = read_database()
+        rendered_people = R.rendered_record_list(people)
+        return R.render_page(content=rendered_people)
 
     if action == "edit_new_person":
         # Show the database & a form for creating a new person
-        addresses = read_database()
-        people           = R.rendered_record_list(addresses)
+        people = read_database()
+        rendered_people           = R.rendered_record_list(people)
         empty_data_entry = R.rendered_record_entry_form({})
         configured_form  = R.render_configured_form(empty_data_entry)
 
-        return R.render_page(content=people, dataentry=configured_form)
+        return R.render_page(content=rendered_people, dataentry=configured_form)
 
     if action == "create_new":
         # Take the data sent to us, and use that to fill out an edit form
@@ -167,33 +130,33 @@ def page_render_html(json, **argd):
         #
         new_person = make_person(stem="form", **argd) # This also stores them in the database
 
-        addresses = read_database()
-        people                = R.rendered_record_list(addresses)
+        people = read_database()
+        rendered_people                = R.rendered_record_list(people)
         pre_filled_data_entry = R.rendered_record_entry_form(new_person)
         configured_form       = R.render_configured_form(pre_filled_data_entry,
                                                        nextstep="update_person",
                                                        )
-        return R.render_page(content=people, dataentry=configured_form)
+        return R.render_page(content=rendered_people, dataentry=configured_form)
 
     if action == "view_person":
         # Show the database & a few options
         person = get_person(argd["personid"])
-        addresses = read_database()
-        people                = R.rendered_record_list(addresses)
+        people = read_database()
+        rendered_people                = R.rendered_record_list(people)
         person_rendered = R.rendered_record(person)
 
-        return R.render_page(content=people, dataentry=person_rendered)
+        return R.render_page(content=rendered_people, dataentry=person_rendered)
 
     if action == "edit_person":
         person = get_person(argd["personid"])
 
-        addresses = read_database()
-        people                = R.rendered_record_list(addresses)
+        people = read_database()
+        rendered_people                = R.rendered_record_list(people)
         pre_filled_data_entry = R.rendered_record_entry_form(person)
         configured_form       = R.render_configured_form(pre_filled_data_entry,
                                                        nextstep="update_person",
                                                        )
-        return R.render_page(content=people, dataentry=configured_form)
+        return R.render_page(content=rendered_people, dataentry=configured_form)
 
     if action == "update_person":
         # Take the data sent to us, and use that to fill out an edit form
@@ -204,12 +167,12 @@ def page_render_html(json, **argd):
         #
         theperson = update_person(stem="form", **argd)
 
-        addresses = read_database()
-        people                = R.rendered_record_list(addresses)
+        people = read_database()
+        rendered_people                = R.rendered_record_list(people)
         pre_filled_data_entry = R.rendered_record_entry_form(theperson)
         configured_form       = R.render_configured_form(pre_filled_data_entry,nextstep="update_person")
 
-        return R.render_page(content=people, dataentry=configured_form)
+        return R.render_page(content=rendered_people, dataentry=configured_form)
 
     if action == "delete_person":
         # Take the data sent to us, and use that to fill out an edit form
@@ -220,8 +183,8 @@ def page_render_html(json, **argd):
         #
         # Show the database & a few options
         person = get_person(argd["personid"])
-        addresses = read_database()
-        people                = R.rendered_record_list(addresses)
+        people = read_database()
+        rendered_people                = R.rendered_record_list(people)
         person_rendered = R.rendered_record(person)
         person_rendered = "<h3> Are you sure you wish to delete this person?</h3><ul>" + str(person_rendered)
 
@@ -229,18 +192,18 @@ def page_render_html(json, **argd):
         cancel_action = "<a href='/cgi-bin/app/people?formtype=view_person&personid=%s'>%s</a>" % (person["personid"], "Cancel deletion")
         person_rendered += "</ul><h3> %s | %s </h3>" % (delete_action, cancel_action)
 
-        return R.render_page(content=people, dataentry=person_rendered)
+        return R.render_page(content=rendered_people, dataentry=person_rendered)
 
     if action == "confirm_delete_person":
         # Show the database & a few options
         person = get_person(argd["personid"])
         delete_person(argd["personid"])
 
-        addresses = read_database()
-        people          = R.rendered_record_list(addresses)
+        people = read_database()
+        rendered_people          = R.rendered_record_list(people)
         person_rendered = R.rendered_record(person)
 
-        return R.render_page(content=people, dataentry="<h1> %s Deleted </h1>" % person["person"])
+        return R.render_page(content=rendered_people, dataentry="<h1> %s Deleted </h1>" % person["person"])
 
 
     return str(Template ( file = 'templates/Page.tmpl', 
