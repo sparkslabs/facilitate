@@ -96,44 +96,6 @@ class RecordRender(object):
                               ] ))
 
 
-if 0:
-    #
-    # Presentation Layer - various aspects of complexity
-    #
-
-    def rendered_record_list(addresses):
-        missions = Template ( file = 'templates/Missions.View.tmpl',
-                            searchList = [{"missions" : addresses}] )
-        return missions
-
-    def rendered_record_entry_form(mission):
-        dataentry = Template ( file = 'templates/Mission.Edit.tmpl', searchList = [mission] )
-        return dataentry
-
-    def rendered_mission(mission):
-        dataentry = Template ( file = 'templates/Mission.View.tmpl', searchList = [mission] )
-        return dataentry
-
-    def render_configured_form(pre_filled_data_entry,nextstep="create_new"):
-        configured_form = Template ( file = 'templates/Form.tmpl', 
-                                     searchList = [{
-                                           "formbody":pre_filled_data_entry,
-                                           "formtype":nextstep,
-                                                  }]
-                                   )
-        return configured_form
-
-    def render_page(content="", extra="", dataentry="", environ={}):
-        return str(Template ( file = 'templates/Page.tmpl',
-                             searchList = [
-                                  environ,
-                                  {
-                                    "extra": extra ,
-                                    "content" : content,
-                                    "dataentry" : dataentry,
-                                  }
-                              ] ))
-
 #
 # Actually _Mission_ Life Cycle Logic
 #
