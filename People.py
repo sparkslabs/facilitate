@@ -143,9 +143,9 @@ def page_render_html(json, **argd):
         person = get_person(argd["personid"])
         people = read_database()
         rendered_people                = R.rendered_record_list(people)
-        person_rendered = R.rendered_record(person)
+        rendered_person = R.rendered_record(person)
 
-        return R.render_page(content=rendered_people, dataentry=person_rendered)
+        return R.render_page(content=rendered_people, dataentry=rendered_person)
 
     if action == "edit_person":
         person = get_person(argd["personid"])
@@ -185,14 +185,14 @@ def page_render_html(json, **argd):
         person = get_person(argd["personid"])
         people = read_database()
         rendered_people                = R.rendered_record_list(people)
-        person_rendered = R.rendered_record(person)
-        person_rendered = "<h3> Are you sure you wish to delete this person?</h3><ul>" + str(person_rendered)
+        rendered_person = R.rendered_record(person)
+        rendered_person = "<h3> Are you sure you wish to delete this person?</h3><ul>" + str(rendered_person)
 
         delete_action = "<a href='/cgi-bin/app/people?formtype=confirm_delete_person&personid=%s'>%s</a>" % (person["personid"], "Delete this person")
         cancel_action = "<a href='/cgi-bin/app/people?formtype=view_person&personid=%s'>%s</a>" % (person["personid"], "Cancel deletion")
-        person_rendered += "</ul><h3> %s | %s </h3>" % (delete_action, cancel_action)
+        rendered_person += "</ul><h3> %s | %s </h3>" % (delete_action, cancel_action)
 
-        return R.render_page(content=rendered_people, dataentry=person_rendered)
+        return R.render_page(content=rendered_people, dataentry=rendered_person)
 
     if action == "confirm_delete_person":
         # Show the database & a few options
@@ -201,7 +201,7 @@ def page_render_html(json, **argd):
 
         people = read_database()
         rendered_people          = R.rendered_record_list(people)
-        person_rendered = R.rendered_record(person)
+        rendered_person = R.rendered_record(person)
 
         return R.render_page(content=rendered_people, dataentry="<h1> %s Deleted </h1>" % person["person"])
 
