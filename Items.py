@@ -55,10 +55,10 @@ class RecordRender(object):
     def __init__(self, environ):
         self.environ = environ
 
-    def rendered_record_list(self, addresses):
-        people = Template ( file = self.record_listview_template,
-                            searchList = [self.environ, {"Items": addresses}] )
-        return people
+    def rendered_record_list(self, items):
+        rendered_items = Template ( file = self.record_listview_template,
+                            searchList = [self.environ, {"Items": items}] )
+        return rendered_items
 
     def rendered_record_entry_form(self, item):
         dataentry = Template ( file = self.record_editget_template,
@@ -108,18 +108,18 @@ def page_render_html(json, **argd):
         #
         # Currently dumps all items - non-selected, unrestricted view
         #
-        addresses = read_database()
-        people                = R.rendered_record_list(addresses)
-        return R.render_page(content=people)
+        items = read_database()
+        rendered_items  = R.rendered_record_list(items)
+        return R.render_page(content=rendered_items)
 
     if action == "view":
         # Show the database & a few options
         item = get_item(argd["itemid"])
-        addresses = read_database()
-        people                = R.rendered_record_list(addresses)
+        items = read_database()
+        rendered_items                = R.rendered_record_list(items)
         item_rendered = R.rendered_record(item)
 
-        return R.render_page(content=people, dataentry=item_rendered)
+        return R.render_page(content=rendered_items, dataentry=item_rendered)
 
     if action == "edit_new":
         #
@@ -128,12 +128,12 @@ def page_render_html(json, **argd):
         #    If the user hits "Add Item", then the user will upload their data and
         #    create a new item. Next view: create_new
         #
-        addresses = read_database()
-        people           = R.rendered_record_list(addresses)
+        items = read_database()
+        rendered_items           = R.rendered_record_list(items)
         empty_data_entry = R.rendered_record_entry_form({})
         configured_form  = R.render_configured_form(empty_data_entry,submitlabel="Add Item")
 
-        return R.render_page(content=people, dataentry=configured_form)
+        return R.render_page(content=rendered_items, dataentry=configured_form)
 
     if action == "update":
         #
@@ -157,25 +157,25 @@ def page_render_html(json, **argd):
             if old_filename  and (old_filename != new_filename):
                 os.unlink(old_filename)
 
-        addresses = read_database()
-        people                = R.rendered_record_list(addresses)
+        items = read_database()
+        rendered_items                = R.rendered_record_list(items)
         pre_filled_data_entry = R.rendered_record_entry_form(new_item)
         configured_form       = R.render_configured_form(pre_filled_data_entry,
                                                        nextstep="update",
                                                        submitlabel="Update Item"
                                                        )
-        return R.render_page(content=people, dataentry=configured_form)
+        return R.render_page(content=rendered_items, dataentry=configured_form)
 
     if action == "edit":
         item = get_item(argd["itemid"])
 
-        addresses = read_database()
-        people                = R.rendered_record_list(addresses)
+        items = read_database()
+        rendered_items                = R.rendered_record_list(items)
         pre_filled_data_entry = R.rendered_record_entry_form(item)
         configured_form       = R.render_configured_form(pre_filled_data_entry,
                                                        nextstep="update",
                                                        )
-        return R.render_page(content=people, dataentry=configured_form)
+        return R.render_page(content=rendered_items, dataentry=configured_form)
 
     if action == "create_new":
         # Take the data sent to us, and use that to fill out an edit form
@@ -186,12 +186,12 @@ def page_render_html(json, **argd):
         #
         theitem = make_item(stem="form", **argd) # This also stores them in the database
 
-        addresses = read_database()
-        people                = R.rendered_record_list(addresses)
+        items = read_database()
+        rendered_items                = R.rendered_record_list(items)
         pre_filled_data_entry = R.rendered_record_entry_form(theitem)
         configured_form       = R.render_configured_form(pre_filled_data_entry,nextstep="update")
 
-        return R.render_page(content=people, dataentry=configured_form)
+        return R.render_page(content=rendered_items, dataentry=configured_form)
 
     if action == "delete":
         # Take the data sent to us, and use that to fill out an edit form
@@ -202,8 +202,8 @@ def page_render_html(json, **argd):
         #
         # Show the database & a few options
         item = get_item(argd["itemid"])
-        addresses = read_database()
-        people                = R.rendered_record_list(addresses)
+        items = read_database()
+        rendered_items                = R.rendered_record_list(items)
         item_rendered = R.rendered_record(item)
 
         item_rendered = "<h3> Are you sure you wish to delete this item?</h3><ul>" + str(item_rendered)
@@ -212,7 +212,7 @@ def page_render_html(json, **argd):
         cancel_action = "<a href='/cgi-bin/app/items?formtype=view&itemid=%s'>%s</a>" % (item["itemid"], "Cancel deletion")
         item_rendered += "</ul><h3> %s | %s </h3>" % (delete_action, cancel_action)
 
-        return R.render_page(content=people, dataentry=item_rendered)
+        return R.render_page(content=rendered_items, dataentry=item_rendered)
 
     if action == "confirm_delete":
         # Show the database & a few options
@@ -221,11 +221,11 @@ def page_render_html(json, **argd):
         os.unlink(item["__filename"])
         delete_item(argd["itemid"])
 
-        addresses = read_database()
-        people          = R.rendered_record_list(addresses)
+        items = read_database()
+        rendered_items          = R.rendered_record_list(items)
         item_rendered = R.rendered_record(item)
 
-        return R.render_page(content=people, dataentry="<h1> %s Deleted </h1>" % item["item"])
+        return R.render_page(content=rendered_items, dataentry="<h1> %s Deleted </h1>" % item["item"])
 
 
     return str(Template ( file = 'templates/Page.tmpl', 
