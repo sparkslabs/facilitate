@@ -1,10 +1,11 @@
 #def $banner: Participate App V0
-#def $peopleappurl: /cgi-bin/app/people
-#def $itemsappurl: /cgi-bin/app/items
-#def $items_peopleappurl: /cgi-bin/app/items_people
-#def $missionsappurl: /cgi-bin/app/missions
-#def $missionsstepsappurl: /cgi-bin/app/missionsteps
-#def $wizardsappurl: /cgi-bin/app/wizards
+#def $peopleappurl: /cgi-bin/facilitate/people
+#def $itemsappurl: /cgi-bin/facilitate/items
+#def $items_peopleappurl: /cgi-bin/facilitate/items_people
+#def $missionsappurl: /cgi-bin/facilitate/missions
+#def $missionsstepsappurl: /cgi-bin/facilitate/missionsteps
+#def $wizardsappurl: /cgi-bin/facilitate/wizards
+#def $commentsappurl:/cgi-bin/facilitate/comments
 
 #def $addpersonurl: $peopleappurl?formtype=edit_new_person
 #def $addperson: <a href="$addpersonurl">Add</a>
@@ -30,6 +31,11 @@
 #def $addsimplemission: <a href="$addsimplemissionurl">Simple Mission</a>
 #def $authoringapphomelink: <a href="$wizardsappurl">Home</a>
 
+#def $addcommenturl: $commentsappurl?formtype=edit_new_comment
+#def $addcomment: <a href="$addcommenturl">Add</a>
+#def $commentapphomelink: <a href="$commentsappurl">Home </a>
+
+
 
 #def $pretext:
 <table><tr>
@@ -39,6 +45,7 @@
 <td align="center" style="border: 3px solid; padding: 8;"> Mission<br>($missionshomelink | $addmission) </td>
 <td align="center" style="border: 3px solid; padding: 8;"> Mission Step<br>($missionsstepshomelink | $addmissionstep ) </td>
 <td align="center" style="border: 3px solid; padding: 8;"> Wizards<br>($authoringapphomelink | $addsimplemission ) </td>
+<td align="center" style="border: 3px solid; padding: 8;"> Comments<br>($commentapphomelink| $addcomment ) </td>
 </tr></table>
 #end def
 #def $content: <p>
