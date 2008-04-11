@@ -3,51 +3,51 @@
 from Cheetah.Template import Template
 from model.Record import EntitySet
 
-MissionsDatabase = EntitySet("missions",key="missionid")
+MsMissionsDatabase = EntitySet("msmissions",key="msmissionid")
 
-def store_new_mission(the_mission): return MissionsDatabase.new_record(the_mission)
-def read_database(): return MissionsDatabase.read_database()
-def store_mission(mission): return MissionsDatabase.store_record(mission)
-def get_mission(mission): return MissionsDatabase.get_record(mission)
-def delete_mission(mission): return MissionsDatabase.delete_record(mission)
-
-#
-# Map web request to data layer
-#
-
-def make_mission(stem="form", **argd):
-    new_mission = {
-        "mission" : argd.get(stem + ".mission",""),
-        "shortdescription" : argd.get(stem + ".shortdescription",""),
-        "mediumdescription" : argd.get(stem + ".mediumdescription",""),
-        "longdescription": argd.get(stem + ".longdescription",""),
-        "basemission": argd.get(stem + ".basemission",""),
-    }
-    new_mission = store_new_mission(new_mission)
-    return new_mission
+def store_new_msmission(the_msmission): return MsMissionsDatabase.new_record(the_msmission)
+def read_database(): return MsMissionsDatabase.read_database()
+def store_msmission(msmission): return MsMissionsDatabase.store_record(msmission)
+def get_msmission(msmission): return MsMissionsDatabase.get_record(msmission)
+def delete_msmission(msmission): return MsMissionsDatabase.delete_record(msmission)
 
 #
 # Map web request to data layer
 #
 
-def update_mission(stem="form", **argd):
-    the_mission = {
-        "missionid" : argd.get(stem + ".missionid",""),
-        "mission" : argd.get(stem + ".mission",""),
+def make_msmission(stem="form", **argd):
+    new_msmission = {
+        "msmission" : argd.get(stem + ".msmission",""),
         "shortdescription" : argd.get(stem + ".shortdescription",""),
         "mediumdescription" : argd.get(stem + ".mediumdescription",""),
         "longdescription": argd.get(stem + ".longdescription",""),
-        "basemission": argd.get(stem + ".basemission",""),
+        "basemsmission": argd.get(stem + ".basemsmission",""),
     }
-    store_mission(the_mission)
-    return the_mission
+    new_msmission = store_new_msmission(new_msmission)
+    return new_msmission
+
+#
+# Map web request to data layer
+#
+
+def update_msmission(stem="form", **argd):
+    the_msmission = {
+        "msmissionid" : argd.get(stem + ".msmissionid",""),
+        "msmission" : argd.get(stem + ".msmission",""),
+        "shortdescription" : argd.get(stem + ".shortdescription",""),
+        "mediumdescription" : argd.get(stem + ".mediumdescription",""),
+        "longdescription": argd.get(stem + ".longdescription",""),
+        "basemsmission": argd.get(stem + ".basemsmission",""),
+    }
+    store_msmission(the_msmission)
+    return the_msmission
 
 
 
 class RecordRender(object):
-    record_listview_template = 'templates/Missions.View.tmpl'
-    record_editget_template = 'templates/Mission.Edit.tmpl'
-    record_view_template = 'templates/Mission.View.tmpl'
+    record_listview_template = 'templates/MsMissions.View.tmpl'
+    record_editget_template = 'templates/MsMission.Edit.tmpl'
+    record_view_template = 'templates/MsMission.View.tmpl'
     record_editpost_template = 'templates/Form.tmpl'         # Actually to do with a configured form isn't it...
     page_template = 'templates/Page.tmpl'
 
@@ -56,9 +56,9 @@ class RecordRender(object):
         self.__dict__.update(argd)
 
     def rendered_record_list(self, addresses):
-        missions = Template ( file = self.record_listview_template,
-                            searchList = [self.environ, {"missions": addresses}] )
-        return missions
+        msmissions = Template ( file = self.record_listview_template,
+                            searchList = [self.environ, {"msmissions": addresses}] )
+        return msmissions
 
     def rendered_record_entry_form(self, item):
         dataentry = Template ( file = self.record_editget_template,
@@ -97,7 +97,7 @@ class RecordRender(object):
 
 
 #
-# Actually _Mission_ Life Cycle Logic
+# Actually _MsMission_ Life Cycle Logic
 #
 
 def page_render_html(json, **argd):
@@ -106,17 +106,17 @@ def page_render_html(json, **argd):
     if action == "overview":
         # Show the database & a few options
         addresses = read_database()
-        missions                = R.rendered_record_list(addresses)
-        return R.render_page(content=missions)
+        msmissions                = R.rendered_record_list(addresses)
+        return R.render_page(content=msmissions)
 
     if action == "edit_new":
-        # Show the database & a form for creating a new mission
+        # Show the database & a form for creating a new msmission
         addresses = read_database()
-        missions           = R.rendered_record_list(addresses)
+        msmissions           = R.rendered_record_list(addresses)
         empty_data_entry = R.rendered_record_entry_form({})
         configured_form  = R.render_configured_form(empty_data_entry)
 
-        return R.render_page(content=missions, dataentry=configured_form)
+        return R.render_page(content=msmissions, dataentry=configured_form)
 
     if action == "create_new":
         # Take the data sent to us, and use that to fill out an edit form
@@ -124,53 +124,53 @@ def page_render_html(json, **argd):
         # If they submit the new form, the surely they should be viewed to be updating the form?
         # yes...
         #
-        new_mission = make_mission(stem="form", **argd) # This also stores them in the database
+        new_msmission = make_msmission(stem="form", **argd) # This also stores them in the database
 
         addresses = read_database()
-        missions                = R.rendered_record_list(addresses)
-        pre_filled_data_entry = R.rendered_record_entry_form(new_mission)
+        msmissions                = R.rendered_record_list(addresses)
+        pre_filled_data_entry = R.rendered_record_entry_form(new_msmission)
         configured_form       = R.render_configured_form(pre_filled_data_entry,
-                                                       nextstep="update_mission",
+                                                       nextstep="update_msmission",
                                                        )
-        return R.render_page(content=missions, dataentry=configured_form)
+        return R.render_page(content=msmissions, dataentry=configured_form)
 
-    if action == "view_mission":
+    if action == "view_msmission":
         # Show the database & a few options
-        mission = get_mission(argd["missionid"])
+        msmission = get_msmission(argd["msmissionid"])
         addresses = read_database()
-        missions                = R.rendered_record_list(addresses)
-        mission_rendered = R.rendered_record(mission)
+        msmissions                = R.rendered_record_list(addresses)
+        msmission_rendered = R.rendered_record(msmission)
 
-        return R.render_page(content=missions, dataentry=mission_rendered)
+        return R.render_page(content=msmissions, dataentry=msmission_rendered)
 
-    if action == "edit_mission":
-        mission = get_mission(argd["missionid"])
+    if action == "edit_msmission":
+        msmission = get_msmission(argd["msmissionid"])
 
         addresses = read_database()
-        missions                = R.rendered_record_list(addresses)
-        pre_filled_data_entry = R.rendered_record_entry_form(mission)
+        msmissions                = R.rendered_record_list(addresses)
+        pre_filled_data_entry = R.rendered_record_entry_form(msmission)
         configured_form       = R.render_configured_form(pre_filled_data_entry,
-                                                       nextstep="update_mission",
+                                                       nextstep="update_msmission",
                                                        )
-        return R.render_page(content=missions, dataentry=configured_form)
+        return R.render_page(content=msmissions, dataentry=configured_form)
 
-    if action == "update_mission":
+    if action == "update_msmission":
         # Take the data sent to us, and use that to fill out an edit form
         #
         # Note: This is actually filling in an *edit* form at that point, not a *new* user form
         # If they submit the new form, the surely they should be viewed to be updating the form?
         # yes...
         #
-        themission = update_mission(stem="form", **argd)
+        themsmission = update_msmission(stem="form", **argd)
 
         addresses = read_database()
-        missions                = R.rendered_record_list(addresses)
-        pre_filled_data_entry = R.rendered_record_entry_form(themission)
-        configured_form       = R.render_configured_form(pre_filled_data_entry,nextstep="update_mission")
+        msmissions                = R.rendered_record_list(addresses)
+        pre_filled_data_entry = R.rendered_record_entry_form(themsmission)
+        configured_form       = R.render_configured_form(pre_filled_data_entry,nextstep="update_msmission")
 
-        return R.render_page(content=missions, dataentry=configured_form)
+        return R.render_page(content=msmissions, dataentry=configured_form)
 
-    if action == "delete_mission":
+    if action == "delete_msmission":
         # Take the data sent to us, and use that to fill out an edit form
         #
         # Note: This is actually filling in an *edit* form at that point, not a *new* user form
@@ -178,28 +178,28 @@ def page_render_html(json, **argd):
         # yes...
         #
         # Show the database & a few options
-        mission = get_mission(argd["missionid"])
+        msmission = get_msmission(argd["msmissionid"])
         addresses = read_database()
-        missions                = R.rendered_record_list(addresses)
-        mission_rendered = R.rendered_record(mission)
-        mission_rendered = "<h3> Are you sure you wish to delete this mission?</h3><ul>" + str(mission_rendered)
+        msmissions                = R.rendered_record_list(addresses)
+        msmission_rendered = R.rendered_record(msmission)
+        msmission_rendered = "<h3> Are you sure you wish to delete this msmission?</h3><ul>" + str(msmission_rendered)
 
-        delete_action = "<a href='/cgi-bin/app/missions?formtype=confirm_delete_mission&missionid=%s'>%s</a>" % (mission["missionid"], "Delete this mission")
-        cancel_action = "<a href='/cgi-bin/app/missions?formtype=view_mission&missionid=%s'>%s</a>" % (mission["missionid"], "Cancel deletion")
-        mission_rendered += "</ul><h3> %s | %s </h3>" % (delete_action, cancel_action)
+        delete_action = "<a href='/cgi-bin/app/msmissions?formtype=confirm_delete_msmission&msmissionid=%s'>%s</a>" % (msmission["msmissionid"], "Delete this msmission")
+        cancel_action = "<a href='/cgi-bin/app/msmissions?formtype=view_msmission&msmissionid=%s'>%s</a>" % (msmission["msmissionid"], "Cancel deletion")
+        msmission_rendered += "</ul><h3> %s | %s </h3>" % (delete_action, cancel_action)
 
-        return R.render_page(content=missions, dataentry=mission_rendered)
+        return R.render_page(content=msmissions, dataentry=msmission_rendered)
 
-    if action == "confirm_delete_mission":
+    if action == "confirm_delete_msmission":
         # Show the database & a few options
-        mission = get_mission(argd["missionid"])
-        delete_mission(argd["missionid"])
+        msmission = get_msmission(argd["msmissionid"])
+        delete_msmission(argd["msmissionid"])
 
         addresses = read_database()
-        missions          = R.rendered_record_list(addresses)
-        mission_rendered = R.rendered_record(mission)
+        msmissions          = R.rendered_record_list(addresses)
+        msmission_rendered = R.rendered_record(msmission)
 
-        return R.render_page(content=missions, dataentry="<h1> %s Deleted </h1>" % mission["mission"])
+        return R.render_page(content=msmissions, dataentry="<h1> %s Deleted </h1>" % msmission["msmission"])
 
 
     return str(Template ( file = 'templates/Page.tmpl', 

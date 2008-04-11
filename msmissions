@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from bbcwsgitools import EnvironDumper, JSON_Interceptor, CGI_Parser, Functional
-from Missions import page_render_html
+from MsMissions import page_render_html
 
 
 if __name__ == "__main__":

@@ -7,6 +7,16 @@
 #def $wizardsappurl: /cgi-bin/facilitate/wizards
 #def $commentsappurl:/cgi-bin/facilitate/comments
 
+
+## Added these lines:
+#def $msmissionsappurl: /cgi-bin/facilitate/msmissions
+#def $addmsmissionurl: $msmissionsappurl?formtype=edit_new
+#def $addmsmission: <a href="$addmsmissionurl">Add</a>
+#def $msmissionshomelink: <a href="$msmissionsappurl">Home</a>
+
+
+
+
 #def $addpersonurl: $peopleappurl?formtype=edit_new_person
 #def $addperson: <a href="$addpersonurl">Add</a>
 #def $peoplehomelink: <a href="$peopleappurl">Home</a>
@@ -46,6 +56,10 @@
 <td align="center" style="border: 3px solid; padding: 8;"> Mission Step<br>($missionsstepshomelink | $addmissionstep ) </td>
 <td align="center" style="border: 3px solid; padding: 8;"> Wizards<br>($authoringapphomelink | $addsimplemission ) </td>
 <td align="center" style="border: 3px solid; padding: 8;"> Comments<br>($commentapphomelink| $addcomment ) </td>
+
+<!-- Also added this line -->
+<td align="center" style="border: 3px solid; padding: 8;"> MsMission<br>($msmissionshomelink | $addmsmission) </td>
+
 </tr></table>
 #end def
 #def $content: <p>
