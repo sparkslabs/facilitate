@@ -3,7 +3,7 @@ import os
 from Cheetah.Template import Template
 from model.Record import EntitySet
 
-CommentDatabase = EntitySet("comments")
+CommentDatabase = EntitySet("comments",key="commentid")
 
 def store_new_comment(the_comment): return CommentDatabase.new_record(the_comment)
 def read_database(): return CommentDatabase.read_database()
@@ -34,7 +34,7 @@ def make_comment(stem="form", **argd):
 
 def update_comment(stem="form", **argd):
     the_comment = {
-        "id" : argd.get(stem + ".id",""),
+        "id" : argd.get(stem + ".commentid",""),
         "comment" : argd.get(stem + ".comment",""),
 #         "person" : argd.get(stem + ".person",""),
 #         "house" : argd.get(stem + ".house",""),
@@ -69,7 +69,7 @@ class RecordRender(object):
                   searchList = [
                         self.environ, {
 									"extra": extra,
-									"content" :  "",#content, # 
+									"content" :  content, # "",#
 									"dataentry" : dataentry,
 									}
 								]
@@ -190,7 +190,7 @@ def page_render_html(json, **argd):
 
     if action == "view_comment":
         # Show the database & a few options
-        comment = get_comment(argd["id"])
+        comment = get_comment(argd["commentid"])
         comments = read_database()
         redered_commments                = R.rendered_record_list(comments)
         rendered_comment = R.rendered_record(comment)

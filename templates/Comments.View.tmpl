@@ -1,7 +1,7 @@
 #def $appurl: $SCRIPT_NAME
 #def $viewurl: $appurl?formtype=view_comment&id=
 #for $comment in $comments
-<li>$comment["id"] ( <a href='$appurl?formtype=view_comment&id=$comment["id"]'>v</a> ) $comment["comment"] 
+<li>$comment["commentid"] ( <a href='$appurl?formtype=view_comment&id=$comment["commentid"]'>v</a> ) $comment["comment"] 
 #end for
 
 
