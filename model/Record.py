@@ -5,6 +5,8 @@ import cjson
 
 class EntitySet(object):
     data = "data"
+    Name = "Demo"
+    Key = "personid"
 
     @classmethod
     def Zap(cls, name="Demo", key="personid"):
@@ -20,8 +22,18 @@ class EntitySet(object):
             if errno != 2:
                 raise
 
-    def __init__(self, name="Demo", key="personid"):
-        self.meta = self.__get_meta(name=name, key=key)
+    def __init__(self, name=None, key=None  , **argd):
+        #
+        # This would need cleaning up later, but for the moment this is to retain backwards compatibility
+        # with the code Ed is working on.
+        #
+        if not name: name = self.Name
+        if not key: key = self.key
+
+        self._name = name
+        self._key = key
+        self.__dict__.update(argd)
+        self.meta = self.__get_meta(name=self._name, key=self._key)
         self.__get_records()
 
     def __get_records(self):
@@ -47,7 +59,6 @@ class EntitySet(object):
             stored_meta = cjson.decode(serialised_meta)
             meta.update(stored_meta)
         except IOError:
-
             try:
                 records = os.listdir(self.data+"/"+name)
             except OSError:
@@ -117,6 +128,14 @@ class EntitySet(object):
 
     def delete_record(self, personid):
         os.unlink("%s/%s/%s" % (self.data, self.meta["name"], personid))
+
+    def select(self, condition):
+        records = []
+        people = self.__get_records()
+        for person in people:
+            if condition(person):
+                records.append( self.get_record(person) )
+        return records
 
 if __name__ == "__main__":
     for set in ["Add","res","ses"]:
