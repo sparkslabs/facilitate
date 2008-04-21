@@ -7,12 +7,6 @@ import os
 
 ItemsDatabase = EntitySet("items",key="itemid")
 
-def store_new_item(the_item): return ItemsDatabase.new_record(the_item)
-def read_database(): return ItemsDatabase.read_database()
-def store_item(item): return ItemsDatabase.store_record(item)
-def get_item(item): return ItemsDatabase.get_record(item)
-def delete_item(item): return ItemsDatabase.delete_record(item)
-
 #
 # Map web request to data layer
 #
@@ -23,7 +17,7 @@ def make_item(stem="form", **argd):
         "__filename" : argd.get(stem + ".upload.1.__filename",""),
         "tags" : argd.get(stem + ".tags",""),
     }
-    new_item = store_new_item(new_item)
+    new_item = ItemsDatabase.new_record(new_item)
     return new_item
 
 #
@@ -38,7 +32,7 @@ def update_item(stem="form", **argd):
         "__filename" : argd.get(stem + ".upload.1.__filename",""),
         "tags" : argd.get(stem + ".tags",""),
     }
-    store_item(the_item)
+    ItemsDatabase.store_record(the_item)
     return the_item
 
 #
@@ -102,20 +96,22 @@ class RecordRender(object):
 def page_render_html(json, **argd):
     action = argd.get("formtype","overview")
     R = RecordRender(argd["__environ__"])
+    DB = ItemsDatabase
+
     if action == "overview":
         #
         # Basic view
         #
         # Currently dumps all items - non-selected, unrestricted view
         #
-        items = read_database()
+        items = DB.read_database()
         rendered_items  = R.rendered_record_list(items)
         return R.render_page(content=rendered_items)
 
     if action == "view":
         # Show the database & a few options
-        item = get_item(argd["itemid"])
-        items = read_database()
+        item = DB.get_record(argd["itemid"])
+        items = DB.read_database()
         rendered_items                = R.rendered_record_list(items)
         item_rendered = R.rendered_record(item)
 
@@ -128,7 +124,7 @@ def page_render_html(json, **argd):
         #    If the user hits "Add Item", then the user will upload their data and
         #    create a new item. Next view: create_new
         #
-        items = read_database()
+        items = DB.read_database()
         rendered_items           = R.rendered_record_list(items)
         empty_data_entry = R.rendered_record_entry_form({})
         configured_form  = R.render_configured_form(empty_data_entry,submitlabel="Add Item")
@@ -146,7 +142,7 @@ def page_render_html(json, **argd):
         # yes...
         #
         try:
-            item = get_item(argd["itemid"])
+            item = DB.get_record(argd["itemid"])
             old_filename = item["__filename"]
         except KeyError:
             old_filename = None
@@ -157,7 +153,7 @@ def page_render_html(json, **argd):
             if old_filename  and (old_filename != new_filename):
                 os.unlink(old_filename)
 
-        items = read_database()
+        items = DB.read_database()
         rendered_items                = R.rendered_record_list(items)
         pre_filled_data_entry = R.rendered_record_entry_form(new_item)
         configured_form       = R.render_configured_form(pre_filled_data_entry,
@@ -167,9 +163,9 @@ def page_render_html(json, **argd):
         return R.render_page(content=rendered_items, dataentry=configured_form)
 
     if action == "edit":
-        item = get_item(argd["itemid"])
+        item = DB.get_record(argd["itemid"])
 
-        items = read_database()
+        items = DB.read_database()
         rendered_items                = R.rendered_record_list(items)
         pre_filled_data_entry = R.rendered_record_entry_form(item)
         configured_form       = R.render_configured_form(pre_filled_data_entry,
@@ -186,7 +182,7 @@ def page_render_html(json, **argd):
         #
         theitem = make_item(stem="form", **argd) # This also stores them in the database
 
-        items = read_database()
+        items = DB.read_database()
         rendered_items                = R.rendered_record_list(items)
         pre_filled_data_entry = R.rendered_record_entry_form(theitem)
         configured_form       = R.render_configured_form(pre_filled_data_entry,nextstep="update")
@@ -201,8 +197,8 @@ def page_render_html(json, **argd):
         # yes...
         #
         # Show the database & a few options
-        item = get_item(argd["itemid"])
-        items = read_database()
+        item = DB.get_record(argd["itemid"])
+        items = DB.read_database()
         rendered_items                = R.rendered_record_list(items)
         item_rendered = R.rendered_record(item)
 
@@ -216,12 +212,12 @@ def page_render_html(json, **argd):
 
     if action == "confirm_delete":
         # Show the database & a few options
-        item = get_item(argd["itemid"])
+        item = DB.get_record(argd["itemid"])
         sys.stderr.write(str(item)+"\n")
         os.unlink(item["__filename"])
-        delete_item(argd["itemid"])
+        DB.delete_record(argd["itemid"])
 
-        items = read_database()
+        items = DB.read_database()
         rendered_items          = R.rendered_record_list(items)
         item_rendered = R.rendered_record(item)
 
