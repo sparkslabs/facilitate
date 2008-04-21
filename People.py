@@ -102,20 +102,30 @@ def page_render_html(json, **argd):
     action = argd.get("formtype","overview")
     R = RecordRender(argd["__environ__"])
     DB = PeopleDatabase
+
     if action == "overview":
         # Show the database & a few options
-        people = DB.read_database()
-        rendered_people = R.rendered_record_list(people)
-        return R.render_page(content=rendered_people)
+        records = DB.read_database()
+        rendered_records = R.rendered_record_list(records)
+        return R.render_page(content=rendered_records)
+
+    if action == "view":
+        # Show the database & a few options
+        record = DB.get_record(argd["personid"])
+        records = DB.read_database()
+        rendered_records                = R.rendered_record_list(records)
+        rendered_record = R.rendered_record(record)
+
+        return R.render_page(content=rendered_records, dataentry=rendered_record)
 
     if action == "edit_new":
         # Show the database & a form for creating a new person
-        people = DB.read_database()
-        rendered_people           = R.rendered_record_list(people)
+        records = DB.read_database()
+        rendered_records           = R.rendered_record_list(records)
         empty_data_entry = R.rendered_record_entry_form({})
         configured_form  = R.render_configured_form(empty_data_entry)
 
-        return R.render_page(content=rendered_people, dataentry=configured_form)
+        return R.render_page(content=rendered_records, dataentry=configured_form)
 
     if action == "create_new":
         # Take the data sent to us, and use that to fill out an edit form
@@ -123,35 +133,24 @@ def page_render_html(json, **argd):
         # If they submit the new form, the surely they should be viewed to be updating the form?
         # yes...
         #
-        new_person = make_person(stem="form", **argd) # This also stores them in the database
+        new_record = make_person(stem="form", **argd) # This also stores them in the database
 
-        people = DB.read_database()
-        rendered_people                = R.rendered_record_list(people)
-        pre_filled_data_entry = R.rendered_record_entry_form(new_person)
-        configured_form       = R.render_configured_form(pre_filled_data_entry,
-                                                       nextstep="update",
-                                                       )
-        return R.render_page(content=rendered_people, dataentry=configured_form)
+        records = DB.read_database()
+        rendered_records                = R.rendered_record_list(records)
+        pre_filled_data_entry = R.rendered_record_entry_form(new_record)
+        configured_form       = R.render_configured_form(pre_filled_data_entry, nextstep="update")
 
-    if action == "view":
-        # Show the database & a few options
-        person = DB.get_record(argd["personid"])
-        people = DB.read_database()
-        rendered_people                = R.rendered_record_list(people)
-        rendered_person = R.rendered_record(person)
-
-        return R.render_page(content=rendered_people, dataentry=rendered_person)
+        return R.render_page(content=rendered_records, dataentry=configured_form)
 
     if action == "edit":
-        person = DB.get_record(argd["personid"])
+        record = DB.get_record(argd["personid"])
 
-        people = DB.read_database()
-        rendered_people                = R.rendered_record_list(people)
-        pre_filled_data_entry = R.rendered_record_entry_form(person)
-        configured_form       = R.render_configured_form(pre_filled_data_entry,
-                                                       nextstep="update",
-                                                       )
-        return R.render_page(content=rendered_people, dataentry=configured_form)
+        records = DB.read_database()
+        rendered_records                = R.rendered_record_list(records)
+        pre_filled_data_entry = R.rendered_record_entry_form(record)
+        configured_form       = R.render_configured_form(pre_filled_data_entry, nextstep="update")
+
+        return R.render_page(content=rendered_records, dataentry=configured_form)
 
     if action == "update":
         # Take the data sent to us, and use that to fill out an edit form
@@ -160,14 +159,17 @@ def page_render_html(json, **argd):
         # If they submit the new form, the surely they should be viewed to be updating the form?
         # yes...
         #
-        theperson = update_person(stem="form", **argd)
+        record = update_person(stem="form", **argd)
 
-        people = DB.read_database()
-        rendered_people                = R.rendered_record_list(people)
-        pre_filled_data_entry = R.rendered_record_entry_form(theperson)
-        configured_form       = R.render_configured_form(pre_filled_data_entry,nextstep="update")
+        records = DB.read_database()
+        rendered_records                = R.rendered_record_list(records)
+        pre_filled_data_entry = R.rendered_record_entry_form(record)
+        configured_form       = R.render_configured_form(pre_filled_data_entry,
+                                                                            nextstep="update",
+                                                                            submitlabel="Update"
+                                        )
 
-        return R.render_page(content=rendered_people, dataentry=configured_form)
+        return R.render_page(content=rendered_records, dataentry=configured_form)
 
     if action == "delete":
         # Take the data sent to us, and use that to fill out an edit form
@@ -191,14 +193,14 @@ def page_render_html(json, **argd):
 
     if action == "confirm_delete":
         # Show the database & a few options
-        person = DB.get_record(argd["personid"])
+        record = DB.get_record(argd["personid"])
         DB.delete_record(argd["personid"])
 
-        people = DB.read_database()
-        rendered_people          = R.rendered_record_list(people)
-        rendered_person = R.rendered_record(person)
+        records = DB.read_database()
+        rendered_records          = R.rendered_record_list(records)
+#        rendered_record = R.rendered_record(record)
 
-        return R.render_page(content=rendered_people, dataentry="<h1> %s Deleted </h1>" % person["person"])
+        return R.render_page(content=rendered_records, dataentry="<h1> %s Deleted </h1>" % record["person"])
 
 
     return str(Template ( file = 'templates/Page.tmpl', 

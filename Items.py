@@ -104,18 +104,18 @@ def page_render_html(json, **argd):
         #
         # Currently dumps all items - non-selected, unrestricted view
         #
-        items = DB.read_database()
-        rendered_items  = R.rendered_record_list(items)
-        return R.render_page(content=rendered_items)
+        records = DB.read_database()
+        rendered_records  = R.rendered_record_list(records)
+        return R.render_page(content=rendered_records)
 
     if action == "view":
         # Show the database & a few options
-        item = DB.get_record(argd["itemid"])
-        items = DB.read_database()
-        rendered_items                = R.rendered_record_list(items)
-        item_rendered = R.rendered_record(item)
+        record = DB.get_record(argd["itemid"])
+        records = DB.read_database()
+        rendered_records                = R.rendered_record_list(records)
+        rendered_record = R.rendered_record(record)
 
-        return R.render_page(content=rendered_items, dataentry=item_rendered)
+        return R.render_page(content=rendered_records, dataentry=rendered_record)
 
     if action == "edit_new":
         #
@@ -124,12 +124,38 @@ def page_render_html(json, **argd):
         #    If the user hits "Add Item", then the user will upload their data and
         #    create a new item. Next view: create_new
         #
-        items = DB.read_database()
-        rendered_items           = R.rendered_record_list(items)
+        records = DB.read_database()
+        rendered_records           = R.rendered_record_list(records)
         empty_data_entry = R.rendered_record_entry_form({})
         configured_form  = R.render_configured_form(empty_data_entry,submitlabel="Add Item")
 
-        return R.render_page(content=rendered_items, dataentry=configured_form)
+        return R.render_page(content=rendered_records, dataentry=configured_form)
+
+    if action == "create_new":
+        # Take the data sent to us, and use that to fill out an edit form
+        #
+        # Note: This is actually filling in an *edit* form at that point, not a *new* user form
+        # If they submit the new form, the surely they should be viewed to be updating the form?
+        # yes...
+        #
+        new_record = make_item(stem="form", **argd) # This also stores them in the database
+
+        records = DB.read_database()
+        rendered_records                = R.rendered_record_list(records)
+        pre_filled_data_entry = R.rendered_record_entry_form(new_record)
+        configured_form       = R.render_configured_form(pre_filled_data_entry, nextstep="update")
+
+        return R.render_page(content=rendered_records, dataentry=configured_form)
+
+    if action == "edit":
+        record = DB.get_record(argd["itemid"])
+
+        records = DB.read_database()
+        rendered_records                = R.rendered_record_list(records)
+        pre_filled_data_entry = R.rendered_record_entry_form(record)
+        configured_form       = R.render_configured_form(pre_filled_data_entry, nextstep="update")
+
+        return R.render_page(content=rendered_records, dataentry=configured_form)
 
     if action == "update":
         #
@@ -142,52 +168,25 @@ def page_render_html(json, **argd):
         # yes...
         #
         try:
-            item = DB.get_record(argd["itemid"])
+            record = DB.get_record(argd["itemid"])
             old_filename = item["__filename"]
         except KeyError:
             old_filename = None
 
-        new_item = update_item(stem="form", **argd)
-        if new_item["__filename"]:
-            new_filename = new_item["__filename"]
+        new_record = update_item(stem="form", **argd)
+        if new_record["__filename"]:
+            new_filename = new_record["__filename"]
             if old_filename  and (old_filename != new_filename):
                 os.unlink(old_filename)
 
-        items = DB.read_database()
-        rendered_items                = R.rendered_record_list(items)
-        pre_filled_data_entry = R.rendered_record_entry_form(new_item)
+        records = DB.read_database()
+        rendered_records                = R.rendered_record_list(records)
+        pre_filled_data_entry = R.rendered_record_entry_form(new_record)
         configured_form       = R.render_configured_form(pre_filled_data_entry,
                                                        nextstep="update",
-                                                       submitlabel="Update Item"
+                                                       submitlabel="Update"
                                                        )
-        return R.render_page(content=rendered_items, dataentry=configured_form)
-
-    if action == "edit":
-        item = DB.get_record(argd["itemid"])
-
-        items = DB.read_database()
-        rendered_items                = R.rendered_record_list(items)
-        pre_filled_data_entry = R.rendered_record_entry_form(item)
-        configured_form       = R.render_configured_form(pre_filled_data_entry,
-                                                       nextstep="update",
-                                                       )
-        return R.render_page(content=rendered_items, dataentry=configured_form)
-
-    if action == "create_new":
-        # Take the data sent to us, and use that to fill out an edit form
-        #
-        # Note: This is actually filling in an *edit* form at that point, not a *new* user form
-        # If they submit the new form, the surely they should be viewed to be updating the form?
-        # yes...
-        #
-        theitem = make_item(stem="form", **argd) # This also stores them in the database
-
-        items = DB.read_database()
-        rendered_items                = R.rendered_record_list(items)
-        pre_filled_data_entry = R.rendered_record_entry_form(theitem)
-        configured_form       = R.render_configured_form(pre_filled_data_entry,nextstep="update")
-
-        return R.render_page(content=rendered_items, dataentry=configured_form)
+        return R.render_page(content=rendered_records, dataentry=configured_form)
 
     if action == "delete":
         # Take the data sent to us, and use that to fill out an edit form
@@ -212,16 +211,16 @@ def page_render_html(json, **argd):
 
     if action == "confirm_delete":
         # Show the database & a few options
-        item = DB.get_record(argd["itemid"])
-        sys.stderr.write(str(item)+"\n")
-        os.unlink(item["__filename"])
+        record = DB.get_record(argd["itemid"])
+        sys.stderr.write(str(record)+"\n")
+        os.unlink(record["__filename"])
         DB.delete_record(argd["itemid"])
 
-        items = DB.read_database()
-        rendered_items          = R.rendered_record_list(items)
-        item_rendered = R.rendered_record(item)
+        records = DB.read_database()
+        rendered_records          = R.rendered_record_list(records)
+#        record_rendered = R.rendered_record(record)
 
-        return R.render_page(content=rendered_items, dataentry="<h1> %s Deleted </h1>" % item["item"])
+        return R.render_page(content=rendered_records, dataentry="<h1> %s Deleted </h1>" % record["item"])
 
 
     return str(Template ( file = 'templates/Page.tmpl', 
