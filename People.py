@@ -108,7 +108,7 @@ def page_render_html(json, **argd):
         rendered_people = R.rendered_record_list(people)
         return R.render_page(content=rendered_people)
 
-    if action == "edit_new_person":
+    if action == "edit_new":
         # Show the database & a form for creating a new person
         people = DB.read_database()
         rendered_people           = R.rendered_record_list(people)
@@ -129,11 +129,11 @@ def page_render_html(json, **argd):
         rendered_people                = R.rendered_record_list(people)
         pre_filled_data_entry = R.rendered_record_entry_form(new_person)
         configured_form       = R.render_configured_form(pre_filled_data_entry,
-                                                       nextstep="update_person",
+                                                       nextstep="update",
                                                        )
         return R.render_page(content=rendered_people, dataentry=configured_form)
 
-    if action == "view_person":
+    if action == "view":
         # Show the database & a few options
         person = DB.get_record(argd["personid"])
         people = DB.read_database()
@@ -142,18 +142,18 @@ def page_render_html(json, **argd):
 
         return R.render_page(content=rendered_people, dataentry=rendered_person)
 
-    if action == "edit_person":
+    if action == "edit":
         person = DB.get_record(argd["personid"])
 
         people = DB.read_database()
         rendered_people                = R.rendered_record_list(people)
         pre_filled_data_entry = R.rendered_record_entry_form(person)
         configured_form       = R.render_configured_form(pre_filled_data_entry,
-                                                       nextstep="update_person",
+                                                       nextstep="update",
                                                        )
         return R.render_page(content=rendered_people, dataentry=configured_form)
 
-    if action == "update_person":
+    if action == "update":
         # Take the data sent to us, and use that to fill out an edit form
         #
         # Note: This is actually filling in an *edit* form at that point, not a *new* user form
@@ -165,11 +165,11 @@ def page_render_html(json, **argd):
         people = DB.read_database()
         rendered_people                = R.rendered_record_list(people)
         pre_filled_data_entry = R.rendered_record_entry_form(theperson)
-        configured_form       = R.render_configured_form(pre_filled_data_entry,nextstep="update_person")
+        configured_form       = R.render_configured_form(pre_filled_data_entry,nextstep="update")
 
         return R.render_page(content=rendered_people, dataentry=configured_form)
 
-    if action == "delete_person":
+    if action == "delete":
         # Take the data sent to us, and use that to fill out an edit form
         #
         # Note: This is actually filling in an *edit* form at that point, not a *new* user form
@@ -183,13 +183,13 @@ def page_render_html(json, **argd):
         rendered_person = R.rendered_record(person)
         rendered_person = "<h3> Are you sure you wish to delete this person?</h3><ul>" + str(rendered_person)
 
-        delete_action = "<a href='/cgi-bin/app/people?formtype=confirm_delete_person&personid=%s'>%s</a>" % (person["personid"], "Delete this person")
-        cancel_action = "<a href='/cgi-bin/app/people?formtype=view_person&personid=%s'>%s</a>" % (person["personid"], "Cancel deletion")
+        delete_action = "<a href='/cgi-bin/app/people?formtype=confirm_delete&personid=%s'>%s</a>" % (person["personid"], "Delete this person")
+        cancel_action = "<a href='/cgi-bin/app/people?formtype=view&personid=%s'>%s</a>" % (person["personid"], "Cancel deletion")
         rendered_person += "</ul><h3> %s | %s </h3>" % (delete_action, cancel_action)
 
         return R.render_page(content=rendered_people, dataentry=rendered_person)
 
-    if action == "confirm_delete_person":
+    if action == "confirm_delete":
         # Show the database & a few options
         person = DB.get_record(argd["personid"])
         DB.delete_record(argd["personid"])
