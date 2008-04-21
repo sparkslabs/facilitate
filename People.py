@@ -3,13 +3,7 @@
 from Cheetah.Template import Template
 from model.Record import EntitySet
 
-PeopleDatabase = EntitySet("people")
-
-def store_new_person(the_person): return PeopleDatabase.new_record(the_person)
-def read_database(): return PeopleDatabase.read_database()
-def store_person(person): return PeopleDatabase.store_record(person)
-def get_person(person): return PeopleDatabase.get_record(person)
-def delete_person(person): return PeopleDatabase.delete_record(person)
+PeopleDatabase = EntitySet("people", "personid")
 
 #
 # Map web request to data layer
@@ -25,7 +19,7 @@ def make_person(stem="form", **argd):
         "postcode": argd.get(stem + ".postcode",""),
         "phone" : argd.get(stem + ".phone",""),
     }
-    new_person = store_new_person(new_person)
+    new_person = PeopleDatabase.new_record(new_person)
     return new_person
 
 #
@@ -43,7 +37,7 @@ def update_person(stem="form", **argd):
         "postcode": argd.get(stem + ".postcode",""),
         "phone" : argd.get(stem + ".phone",""),
     }
-    store_person(the_person)
+    PeopleDatabase.store_record(the_person)
     return the_person
 
 
@@ -107,15 +101,16 @@ class RecordRender(object):
 def page_render_html(json, **argd):
     action = argd.get("formtype","overview")
     R = RecordRender(argd["__environ__"])
+    DB = PeopleDatabase
     if action == "overview":
         # Show the database & a few options
-        people = read_database()
+        people = DB.read_database()
         rendered_people = R.rendered_record_list(people)
         return R.render_page(content=rendered_people)
 
     if action == "edit_new_person":
         # Show the database & a form for creating a new person
-        people = read_database()
+        people = DB.read_database()
         rendered_people           = R.rendered_record_list(people)
         empty_data_entry = R.rendered_record_entry_form({})
         configured_form  = R.render_configured_form(empty_data_entry)
@@ -130,7 +125,7 @@ def page_render_html(json, **argd):
         #
         new_person = make_person(stem="form", **argd) # This also stores them in the database
 
-        people = read_database()
+        people = DB.read_database()
         rendered_people                = R.rendered_record_list(people)
         pre_filled_data_entry = R.rendered_record_entry_form(new_person)
         configured_form       = R.render_configured_form(pre_filled_data_entry,
@@ -140,17 +135,17 @@ def page_render_html(json, **argd):
 
     if action == "view_person":
         # Show the database & a few options
-        person = get_person(argd["personid"])
-        people = read_database()
+        person = DB.get_record(argd["personid"])
+        people = DB.read_database()
         rendered_people                = R.rendered_record_list(people)
         rendered_person = R.rendered_record(person)
 
         return R.render_page(content=rendered_people, dataentry=rendered_person)
 
     if action == "edit_person":
-        person = get_person(argd["personid"])
+        person = DB.get_record(argd["personid"])
 
-        people = read_database()
+        people = DB.read_database()
         rendered_people                = R.rendered_record_list(people)
         pre_filled_data_entry = R.rendered_record_entry_form(person)
         configured_form       = R.render_configured_form(pre_filled_data_entry,
@@ -167,7 +162,7 @@ def page_render_html(json, **argd):
         #
         theperson = update_person(stem="form", **argd)
 
-        people = read_database()
+        people = DB.read_database()
         rendered_people                = R.rendered_record_list(people)
         pre_filled_data_entry = R.rendered_record_entry_form(theperson)
         configured_form       = R.render_configured_form(pre_filled_data_entry,nextstep="update_person")
@@ -182,8 +177,8 @@ def page_render_html(json, **argd):
         # yes...
         #
         # Show the database & a few options
-        person = get_person(argd["personid"])
-        people = read_database()
+        person = DB.get_record(argd["personid"])
+        people = DB.read_database()
         rendered_people                = R.rendered_record_list(people)
         rendered_person = R.rendered_record(person)
         rendered_person = "<h3> Are you sure you wish to delete this person?</h3><ul>" + str(rendered_person)
@@ -196,10 +191,10 @@ def page_render_html(json, **argd):
 
     if action == "confirm_delete_person":
         # Show the database & a few options
-        person = get_person(argd["personid"])
-        delete_person(argd["personid"])
+        person = DB.get_record(argd["personid"])
+        DB.delete_record(argd["personid"])
 
-        people = read_database()
+        people = DB.read_database()
         rendered_people          = R.rendered_record_list(people)
         rendered_person = R.rendered_record(person)
 
