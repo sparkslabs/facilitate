@@ -203,10 +203,10 @@ def page_render_html(json, **argd):
 
     return str(Template ( file = 'templates/Page.tmpl', 
                          searchList = [
-                            argd["__environ__"],
+                              argd["__environ__"],
                               {
                                 "extra": "" ,
-                                "content" : "Sorry, got no idea what you're on!",
+                                "content" : "Sorry, got no idea what you want!",
                                 "dataentry" : "",
                                 "banner" : "Not found", # should send back a 404 status then? Or similar?
                               }
