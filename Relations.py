@@ -2,6 +2,7 @@
 
 from Cheetah.Template import Template
 from model.Record import EntitySet
+import cjson
 import sys
 import os
 
@@ -24,7 +25,7 @@ def delete_item(item): return MissionStepsRelation.delete_record(item)
 #
 # Map web request to data layer
 #
-def get_itemtypes():
+def get_itemtypes():               # Prolly should get moved to Record.py
     itemtype_list=[]
     id = 0 
     for dir in os.listdir("data"):
@@ -32,6 +33,16 @@ def get_itemtypes():
             itemtype_list.append({'itemid':id,'item':dir}) #% (str(id), dir))
             id+=1
     return itemtype_list
+
+def get_itemtype_key(item_type):    # Prolly should get moved to Record.py
+    try:                            # can have empty data_item directory
+         F = open("data/"+item_type+"/.meta") 
+         item_type_key = cjson.decode(F.read())["key"]
+    except:
+         item_type_key = None
+    F.close()
+    return item_type_key
+
 
 def make_item(stem="form", **argd):
     new_item = {
@@ -144,17 +155,17 @@ class RelationRender(object):
 
 def RenderedRelation(R, LeftDB, RightDB):
     addresses = read_database()
-    Items = LeftDB.read_database()
-    People = RightDB.read_database()
+    Left_Items = LeftDB.read_database()
+    Right_Items = RightDB.read_database()
     X,Y = {}, {}
-    for item in Items:
+    for item in Left_Items:
         X[item[LeftDB.key()]] = item
-    for person in People:
-        Y[person[RightDB.key()]] = person
+    for item in Right_Items:
+        Y[item[RightDB.key()]] = item
 
 #    return "people"+str(X)+str(Y)
-    people                = R.rendered_record_list(addresses, X, Y)
-    return people
+   # people                = R.rendered_record_list(addresses, X, Y)
+    return None #people
 
 def RenderedTuple(environ, relationkey, missionstepid, LeftDB, RightDB):
     missionstep = get_item(missionstepid)
@@ -191,8 +202,8 @@ def RenderedRelationEntryForm(environ, LeftRelationName, RightRelationName, Left
     empty_data_entry = Template ( file = "templates/Relation.Edit.tmpl",
                                  searchList = [
                                      environ, {
-                                       "Items":LeftTuples,
-                                       "People":RightTuples,
+                                       "LeftItems":LeftTuples,
+                                       "RightItems":RightTuples,
                                      }, extra_args
                                  ]
                                )
@@ -223,10 +234,23 @@ def page_render_html(json, **argd):
         #configured_form  = R.render_configured_form(pre_filled_data_entry,
 	#	                               nextstep="edit_new"  )  
         # return R.render_page(content=rendered_comments, dataentry=configured_form)
+
     if action == "edit_items":
-        os.sys.stderr.write(argd.get("form.leftid"))
-        os.sys.stderr.write(argd.get("form.rightid"))
-        return R.render_page(content="pop")
+        #os.sys.stderr.write(argd.get("form.leftid")+"\n")
+        #os.sys.stderr.write(argd.get("form.rightid")+"\n")
+        leftdbid = argd.get("form.leftid")
+        rightdbid= argd.get("form.rightid")
+        leftdb_key  = get_itemtype_key(leftdbid)
+        rightdb_key = get_itemtype_key(rightdbid)
+        #os.sys.stderr.write(leftdb_key+" "+rightdb_key+ "\n")
+        leftdb = EntitySet(leftdbid,key=leftdb_key)
+        rightdb = EntitySet(rightdbid,key=rightdb_key)
+        #relation = RenderedRelation(R,leftdb, rightdb )
+        empty_data_entry = RenderedRelationEntryForm( argd["__environ__"], leftdbid, rightdbid, leftdb, rightdb)
+        configured_form  = R.render_configured_form(empty_data_entry,submitlabel="Add Item")
+
+        #return R.render_page(content="pop")
+        return R.render_page(content="pop", dataentry=configured_form)
 
     if action == "view":
 
