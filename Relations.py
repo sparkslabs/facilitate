@@ -78,6 +78,7 @@ def update_item(stem="form", **argd):
 class RelationRender(object):
     record_listview_template = 'templates/Relations.View.tmpl'
     record_editget_template = 'templates/Relation.Edit.tmpl' # Used ?
+    record_editget_items_template = 'templates/Relations.Items.Edit.tmpl'
     record_view_template = 'templates/Relation.View.tmpl'
     record_editpost_template = 'templates/Form.tmpl'         # Posting bulk content...
     page_template = 'templates/Page.tmpl'
@@ -113,6 +114,11 @@ class RelationRender(object):
 
     def rendered_record_entry_form(self, item):
         dataentry = Template ( file = self.record_editget_template,
+                               searchList = [self.environ, item] )
+        return dataentry
+
+    def rendered_record_item_entry_form(self, item):      # so we can edit the items in the relation from arbitary dbs 
+        dataentry = Template ( file = self.record_editget_items_template,
                                searchList = [self.environ, item] )
         return dataentry
 
@@ -216,12 +222,14 @@ def page_render_html(json, **argd):
 
     if action == "overview":
         relations = read_database()
-        rendered_relations                = R.rendered_record_list(relations)
+        rendered_relations   = R.rendered_record_list(relations)  # need generalised Rendered Realtion  here
         #return R.render_page(str(relations))
         return R.render_page(content=rendered_relations) #str(R.environ)) #
 
 
     if action == "edit_new":
+        relations = read_database()
+        rendered_relations = R.rendered_record_list(relations)  # need generalised Rendered Realtion  here
         leftitemtypes = get_itemtypes()           #return the list of top level data items 
         relations = read_database()
         rendered_relations                = R.rendered_record_list(relations)
@@ -236,6 +244,8 @@ def page_render_html(json, **argd):
         # return R.render_page(content=rendered_comments, dataentry=configured_form)
 
     if action == "edit_items":
+        relations = read_database()
+        rendered_relations  = R.rendered_record_list(relations)  # need generalised RenderedRealtion here
         #os.sys.stderr.write(argd.get("form.leftid")+"\n")
         #os.sys.stderr.write(argd.get("form.rightid")+"\n")
         leftdbid = argd.get("form.leftid")
@@ -249,11 +259,9 @@ def page_render_html(json, **argd):
         empty_data_entry = RenderedRelationEntryForm( argd["__environ__"], leftdbid, rightdbid, leftdb, rightdb)
         configured_form  = R.render_configured_form(empty_data_entry,submitlabel="Add Item")
 
-        #return R.render_page(content="pop")
-        return R.render_page(content="pop", dataentry=configured_form)
+        return R.render_page(content=relations, dataentry=configured_form)
 
     if action == "view":
-
         people = RenderedRelation(R, ItemsDatabase, PeopleDatabase)
         rendered_tuple = RenderedTuple(argd["__environ__"],"missionstepid", argd["missionstepid"], ItemsDatabase, PeopleDatabase)
 
