@@ -15,7 +15,10 @@
 #def $msmissionshomelink: <a href="$msmissionsappurl">Home</a>
 
 
-
+#def $relationsappurl: /cgi-bin/app/relations
+#def $addrelationurl: $relationsappurl?formtype=edit_new
+#def $addrelation: <a href="$addrelationurl">Add</a>
+#def $relationshomelink: <a href="$relationsappurl">Home</a>
 
 #def $addpersonurl: $peopleappurl?formtype=edit_new_person
 #def $addperson: <a href="$addpersonurl">Add</a>
@@ -55,10 +58,12 @@
 <td align="center" style="border: 3px solid; padding: 8;"> Mission<br>($missionshomelink | $addmission) </td>
 <td align="center" style="border: 3px solid; padding: 8;"> Mission Step<br>($missionsstepshomelink | $addmissionstep ) </td>
 <td align="center" style="border: 3px solid; padding: 8;"> Wizards<br>($authoringapphomelink | $addsimplemission ) </td>
-<td align="center" style="border: 3px solid; padding: 8;"> Comments<br>($commentapphomelink| $addcomment ) </td>
+<td align="center" style="border: 3px solid; padding: 8;"> Comments<br>($commentapphomelink | $addcomment ) </td>
 
 <!-- Also added this line -->
+<td align="center" style="border: 3px solid; padding: 8;"> Relations<br>($relationshomelink | $addrelation ) </td>
 <td align="center" style="border: 3px solid; padding: 8;"> MsMission<br>($msmissionshomelink | $addmsmission) </td>
+
 
 </tr></table>
 #end def

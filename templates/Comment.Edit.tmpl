@@ -1,5 +1,5 @@
 #def $form: form
-#def $id: -1
+#def $commentid: -1
 #def $comment: &nbsp;
 ##def $person: &nbsp;
 ##def $street: &nbsp;
@@ -9,13 +9,13 @@
 ##def $phone: &nbsp;
 ##def $phone: &nbsp;
 
-<input type="hidden" name="$(form).id" value="$id" /> </td></tr>
+<input type="hidden" name="$(form).commentid" value="$commentid" /> </td></tr>
 <table>
 <tr><td> Comment </td><td> <input type="text" name="$(form).comment" value="$comment" size="30"/> </td></tr>
 
 </table>
 
-##<tr><td> House </td><td> <input type="text" name="$(form).house" value="$house" size="30"/> #</td></tr>
+##<tr><td> Comment</td><td> <input type="text" name="$(form).comment" value="$comment" size="30"/> #</td></tr>
 ##<tr><td> Street </td><td> <input type="text" name="$(form).street" value="$street" size="30"/> </td></tr>
 ##<tr><td> Town </td><td> <input type="text" name="$(form).town" value="$town" size="30"/> </td></tr>
 ##<tr><td> County </td><td> <input type="text" name="$(form).county" value="$county" size="30"/> </td></tr>

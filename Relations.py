@@ -7,7 +7,7 @@ import os
 
 RelationSet = EntitySet
 
-MissionStepsRelation = RelationSet("missionsteps_relation",key="missionstepid")
+MissionStepsRelation = RelationSet("relations",key="relationid")
 ItemsDatabase = EntitySet("missions",key="missionid")
 PeopleDatabase = EntitySet("missions",key="missionid")
 
@@ -24,15 +24,23 @@ def delete_item(item): return MissionStepsRelation.delete_record(item)
 #
 # Map web request to data layer
 #
+def get_itemtypes():
+    itemtype_list=[]
+    id = 0 
+    for dir in os.listdir("data"):
+        if (dir[0] !=  ".") and (dir !="relations") : #so we don't link to ourself or .meta etc.
+            itemtype_list.append({'itemid':id,'item':dir}) #% (str(id), dir))
+            id+=1
+    return itemtype_list
 
 def make_item(stem="form", **argd):
     new_item = {
 #        ItemsDatabase.key() : argd.get(stem + "."+ItemsDatabase.key(),""),
 #        PeopleDatabase.key() : argd.get(stem + "."+PeopleDatabase.key(),""),
-        "leftid" : argd.get(stem + ".leftid",""),
-        "rightid"  : argd.get(stem + ".rightid",""),
-        "humancondition" : argd.get(stem + ".humancondition",""),
-        "machinecondition"  : argd.get(stem + ".machinecondition",""),
+        "left_dbid" : argd.get(stem + ".left_dbid",""),
+        "left_itemid" : argd.get(stem + ".left_itemid",""),
+        "right_dbid"  : argd.get(stem + ".right_dbid",""),
+        "right_itemid"  : argd.get(stem + ".right_itemid",""),
     }
     new_item = store_new_item(new_item)
     return new_item
@@ -43,11 +51,11 @@ def make_item(stem="form", **argd):
 
 def update_item(stem="form", **argd):
     the_item = {
-        "missionstepid" : argd.get(stem + ".missionstepid",""),
-        "leftid" : argd.get(stem + ".leftid",""),
-        "rightid"  : argd.get(stem + ".rightid",""),
-        "humancondition" : argd.get(stem + ".humancondition",""),
-        "machinecondition"  : argd.get(stem + ".machinecondition",""),
+        "relationid" : argd.get(stem + ".relationid",""),
+        "left_dbid" : argd.get(stem + ".left_dbid",""),
+        "left_itemid" : argd.get(stem + ".left_itemid",""),
+        "right_dbid"  : argd.get(stem + ".right_dbid",""),
+        "right_itemid"  : argd.get(stem + ".right_itemid",""),
     }
     store_item(the_item)
     return the_item
@@ -57,18 +65,29 @@ def update_item(stem="form", **argd):
 #
 
 class RelationRender(object):
-    record_listview_template = 'templates/MissionSteps.View.tmpl'
-    record_editget_template = 'templates/MissionStep.Edit.tmpl' # Used ?
-    record_view_template = 'templates/MissionStep.View.tmpl'
+    record_listview_template = 'templates/Relations.View.tmpl'
+    record_editget_template = 'templates/Relation.Edit.tmpl' # Used ?
+    record_view_template = 'templates/Relation.View.tmpl'
     record_editpost_template = 'templates/Form.tmpl'         # Posting bulk content...
     page_template = 'templates/Page.tmpl'
+    itemtypes_view_template = 'templates/ItemTypes.View.tmpl'#template to view data item types
     leftfields = ["mission", "shortdescription"]
     rightfields = ["mission", "shortdescription"]
 
     def __init__(self, environ):
         self.environ = environ
 
-    def rendered_record_list(self, records, table_one, table_two):
+    def rendered_record_list(self,relations):
+        rendered_relations = Template ( file = self.record_listview_template,
+                            searchList = [self.environ, {"relations": relations}] )
+        return rendered_relations
+
+    def rendered_itemtypes(self,itemtypes):
+         rendered_itemtypes = Template( file = self.itemtypes_view_template,
+				      searchList = [self.environ, {"itemtypes":itemtypes}])
+         return rendered_itemtypes
+#************* TBD ****************** define template and how to populate it from itemtypes list passed here ***************
+    def rendered_relation_list(self, records, table_one, table_two):
         people = Template ( file = self.record_listview_template,
                             searchList = [self.environ, {
                                                          "tuples": records,
@@ -106,7 +125,7 @@ class RelationRender(object):
         return configured_form
 
     def render_page(self, content="", extra="", dataentry=""):
-        return str(Template ( file = 'templates/Page.tmpl', 
+        X = Template ( file = 'templates/Page.tmpl', 
                              searchList = [
                                   self.environ,
                                   {
@@ -114,8 +133,14 @@ class RelationRender(object):
                                     "content" : content,
                                     "dataentry" : dataentry,
                                   }
-                              ] ))
+                              ] )
+        X = str(X)
+        return X
 
+    def render_databases(self, content="", extra="",dataentry=""):
+        X = Template( file='templates/Page.tmpl'
+                  )
+                           
 
 def RenderedRelation(R, LeftDB, RightDB):
     addresses = read_database()
@@ -163,7 +188,7 @@ def RenderedRelationEntryForm(environ, LeftRelationName, RightRelationName, Left
     LeftTuples = LeftDB.read_database()
     RightTuples = RightDB.read_database()
 
-    empty_data_entry = Template ( file = "templates/MissionStep.Edit.tmpl",
+    empty_data_entry = Template ( file = "templates/Relation.Edit.tmpl",
                                  searchList = [
                                      environ, {
                                        "Items":LeftTuples,
@@ -179,10 +204,29 @@ def page_render_html(json, **argd):
     R = RelationRender(argd["__environ__"])
 
     if action == "overview":
-        people = str(RenderedRelation(R, ItemsDatabase, PeopleDatabase))
+        relations = read_database()
+        rendered_relations                = R.rendered_record_list(relations)
+        #return R.render_page(str(relations))
+        return R.render_page(content=rendered_relations) #str(R.environ)) #
 
-        X = R.render_page(content=people)
-        return X
+
+    if action == "edit_new":
+        leftitemtypes = get_itemtypes()           #return the list of top level data items 
+        relations = read_database()
+        rendered_relations                = R.rendered_record_list(relations)
+        empty_data_entry = R.rendered_itemtypes(leftitemtypes)
+        configured_form = R.render_configured_form(empty_data_entry, nextstep="edit_items")
+        return R.render_page(content=rendered_relations, dataentry=configured_form) 
+                                                   
+        #pre_filled_data_entry = R.rendered_record_entry_form(new_item)
+        #configured_form  = R.render_configured_form(rendered_itemtypes,submitlabel="Add Item")
+        #configured_form  = R.render_configured_form(pre_filled_data_entry,
+	#	                               nextstep="edit_new"  )  
+        # return R.render_page(content=rendered_comments, dataentry=configured_form)
+    if action == "edit_items":
+        os.sys.stderr.write(argd.get("form.leftid"))
+        os.sys.stderr.write(argd.get("form.rightid"))
+        return R.render_page(content="pop")
 
     if action == "view":
 
@@ -191,14 +235,7 @@ def page_render_html(json, **argd):
 
         return R.render_page(content=people, dataentry=rendered_tuple)
 
-    if action == "edit_new":
-        people = RenderedRelation(R, ItemsDatabase, PeopleDatabase)
-
-        empty_data_entry = RenderedRelationEntryForm( argd["__environ__"], "Items", "People", ItemsDatabase, PeopleDatabase)
-        configured_form  = R.render_configured_form(empty_data_entry,submitlabel="Add Item")
-
-        return R.render_page(content=people, dataentry=configured_form)
-
+   
     if action == "edit":
         item_person = get_item(argd["missionstepid"])
 
@@ -218,9 +255,9 @@ def page_render_html(json, **argd):
         return R.render_page(content=people, dataentry=configured_form)
 
     if action == "create_new":
-
+        os.sys.stderr.write(argd.get("form.leftid"))
         new_item = make_item(stem="form", **argd) # This also stores them in the database
-
+		#available_relations = R.rendered_itemtypes(itemtypes)
         people = RenderedRelation(R, ItemsDatabase, PeopleDatabase)
         rendered_tuple = RenderedTuple(argd["__environ__"],"missionstepid", new_item["missionstepid"], ItemsDatabase, PeopleDatabase)
         rendered_tuple = "<B> Record Saved </B>. If you wish to update, please do" + str(rendered_tuple)
@@ -242,7 +279,7 @@ def page_render_html(json, **argd):
 
         return R.render_page(content=people, dataentry=rendered_tuple)
 
-    if action == "delete_item":
+    if action == "delete_relation":
         # Take the data sent to us, and use that to fill out an edit form
         #
         # Note: This is actually filling in an *edit* form at that point, not a *new* user form
@@ -250,29 +287,29 @@ def page_render_html(json, **argd):
         # yes...
         #
         # Show the database & a few options
-        #item = get_item(argd["missionstepid"])
-        people = RenderedRelation(R, ItemsDatabase, PeopleDatabase)
+        item = get_item(argd["relationid"])
+        #people = RenderedRelation(R, ItemsDatabase, PeopleDatabase)
 
-        item_rendered = RenderedTuple(argd["__environ__"],"missionstepid", item["missionstepid"], ItemsDatabase, PeopleDatabase)
+        #item_rendered = RenderedTuple(argd["__environ__"],"relationidid", item["relationid"], ItemsDatabase, PeopleDatabase)
 
-        prebanner = "<h3> Are you sure you wish to delete this item</h3>"
-        delete_action = "<a href='/cgi-bin/app/missionsteps?formtype=confirm_delete&missionstepid=%s'>%s</a>" % (item["missionstepid"], "Delete this item")
-        cancel_action = "<a href='/cgi-bin/app/missionsteps?formtype=view&missionstepid=%s'>%s</a>" % (item["missionstepid"], "Cancel deletion")
+        #prebanner = "<h3> Are you sure you wish to delete this item</h3>"
+        #delete_action = "<a href='/cgi-bin/app/missionsteps?formtype=confirm_delete&relationid=%s'>%s</a>" % (item["relationid"], "Delete this item")
+        #cancel_action = "<a href='/cgi-bin/app/missionsteps?formtype=view&relationid=%s'>%s</a>" % (item["relationid"], "Cancel deletion")
 
-        delete_message = "%s <ul> %s </ul><h3> %s | %s </h3>" % (prebanner, str(item_rendered), delete_action, cancel_action)
-
-        return R.render_page(content=people, dataentry=delete_message)
+        #delete_message = "%s <ul> %s </ul><h3> %s | %s </h3>" % (prebanner, str(item_rendered), delete_action, cancel_action)
+        return R.render_page(content=str(item))#people, dataentry=delete_message)
+        
 
     if action == "confirm_delete":
         # Show the database & a few options
 
-        item = get_item(argd["missionstepid"])
+        item = get_item(argd["relationid"])
 
-        delete_item(argd["missionstepid"])
+        delete_item(argd["relationid"])
 
         people = RenderedRelation(R, ItemsDatabase, PeopleDatabase)
 
-        return R.render_page(content=people, dataentry="<h1> Record %s Deleted </h1>" % argd["missionstepid"])
+        return R.render_page(content=people, dataentry="<h1> Record %s Deleted </h1>" % argd["relationid"])
 
     return str(Template ( file = 'templates/Page.tmpl', 
                          searchList = [
@@ -284,6 +321,19 @@ def page_render_html(json, **argd):
                                 "banner" : "Not found", # XXXX should send back a 404 status
                               }
                           ] ))
+
+
+if 0:
+    if action == "edit_new":
+        people = RenderedRelation(R, ItemsDatabase, PeopleDatabase)
+
+        empty_data_entry = RenderedRelationEntryForm( argd["__environ__"], "Items", "People", ItemsDatabase, PeopleDatabase)
+        configured_form  = R.render_configured_form(empty_data_entry,submitlabel="Add Item")
+
+        return R.render_page(content=people, dataentry=configured_form)
+
+
+
 
 if __name__ == "__main__":
 
