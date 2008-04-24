@@ -1,38 +1,42 @@
 #def $form: form
 #def $leftselected: None
 #def $rightselected: None
-#def $missionstepid: -1
-#def $pretext: Create mission step between:
-#def $humancondition: &nbsp;
-#def $machinecondition: &nbsp;
+#def $relationid: -1
+#def $pretext: Create relation between:
+#def $fortext: Items in 
+#def $intertext: and items in 
+#def $left_dbid: &nbsp;
+##def $rightdbid: &nbsp;
 
-<input type="hidden" name="$(form).missionstepid" value="$missionstepid" />
+<input type="hidden" name="$(form).relationid" value="$relationid" />
 <P>$pretext
 <ul>
-#if $missionstepid != "-1"
-$missionstepid
+$fortext
+#if $relationid != "-1"
+$relationid
+$left_dbid
 #end if
 <select name="$(form).leftid">
-#for $item in $Items
-<option value="$item["missionid"]"
-#if $item["missionid"] == $leftselected
+#for $item in $LeftItems
+<option value="$item["commentid"]"
+#if $item["commentid"] == $leftselected
 selected
 #end if
->$item["mission"],  $item["shortdescription"]</option>
+##>$item["comment"],  $item["shortdescription"]</option>
 #end for
 </select>
-
+$intertext
 <select name="$(form).rightid">
-#for $person in $People
-<option value="$person["missionid"]"
-#if $person["missionid"] == $rightselected
+#for $person in $RightItems
+<option value="$person["commentid"]"
+#if $person["commentid"] == $rightselected
 selected
 #end if
->$person["mission"],  $person["shortdescription"]</option>
+##>$person["comment"],  $person["shortdescription"]</option>
 #end for
 </select>
 </ul>
-<table>
-<tr><td> Condition Description</td><td> <input type="text" name="$(form).humancondition" value="$humancondition" size="30"/> </td></tr>
-<tr><td> Condition Filter</td><td> <input type="text" name="$(form).machinecondition" value="$machinecondition" size="30"/> </td></tr>
-</table>
+##<table>
+##<tr><td> Condition Description</td><td> <input type="text" name="$(form).humancondition" value="$humancondition" size="30"/> </td></tr>
+##<tr><td> Condition Filter</td><td> <input type="text" name="$(form).machinecondition" value="$machinecondition" size="30"/> </td></tr>
+##</table>

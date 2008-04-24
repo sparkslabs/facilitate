@@ -141,6 +141,20 @@ class RelationRender(object):
                                    )
         return configured_form
 
+    def render_configured_item_form(self, pre_filled_data_entry,
+                               nextstep="create_new",
+                               submitlabel="Add Item"):
+
+        configured_form = Template ( file = self.record_editpost_template,
+                                     searchList = [
+                                         self.environ, {
+                                           "formbody":pre_filled_data_entry,
+                                           "formtype":nextstep,
+                                           "submitlabel": submitlabel,
+                                                  }]
+                                   )
+        return configured_form
+
     def render_page(self, content="", extra="", dataentry=""):
         X = Template ( file = 'templates/Page.tmpl', 
                              searchList = [
@@ -204,10 +218,13 @@ def RenderedRelationEntryForm(environ, LeftRelationName, RightRelationName, Left
 
     LeftTuples = LeftDB.read_database()
     RightTuples = RightDB.read_database()
-
-    empty_data_entry = Template ( file = "templates/Relation.Edit.tmpl",
+    os.sys.stderr.write(str(RightTuples)+"\n")
+    os.sys.stderr.write(str(LeftRelationName)+"\n")
+    empty_data_entry = Template ( file = "templates/Relations.Items.Edit.tmpl",
                                  searchList = [
                                      environ, {
+                                       "leftdb_id":LeftRelationName,
+                                       "rightdb_id": RightRelationName,
                                        "LeftItems":LeftTuples,
                                        "RightItems":RightTuples,
                                      }, extra_args
@@ -245,21 +262,25 @@ def page_render_html(json, **argd):
 
     if action == "edit_items":
         relations = read_database()
-        rendered_relations  = R.rendered_record_list(relations)  # need generalised RenderedRealtion here
+         #rendered_relations  = R.rendered_record_list(relations)  # need generalised RenderedRealtion here
         #os.sys.stderr.write(argd.get("form.leftid")+"\n")
         #os.sys.stderr.write(argd.get("form.rightid")+"\n")
+        
         leftdbid = argd.get("form.leftid")
         rightdbid= argd.get("form.rightid")
         leftdb_key  = get_itemtype_key(leftdbid)
         rightdb_key = get_itemtype_key(rightdbid)
+        available_relations = RenderedRelation(R, leftdbid, rightdbid)
         #os.sys.stderr.write(leftdb_key+" "+rightdb_key+ "\n")
         leftdb = EntitySet(leftdbid,key=leftdb_key)
         rightdb = EntitySet(rightdbid,key=rightdb_key)
         #relation = RenderedRelation(R,leftdb, rightdb )
         empty_data_entry = RenderedRelationEntryForm( argd["__environ__"], leftdbid, rightdbid, leftdb, rightdb)
-        configured_form  = R.render_configured_form(empty_data_entry,submitlabel="Add Item")
+        os.sys.stderr.write("empty data entry returned \n")
+        os.sys.stderr.write(repr(empty_data_entry))
+        configured_form  = R.render_configured_item_form(empty_data_entry,nextstep="create_new",submitlabel="Add Item")
 
-        return R.render_page(content=relations, dataentry=configured_form)
+        return R.render_page(content=rendered_relations, dataentry=configured_form)
 
     if action == "view":
         people = RenderedRelation(R, ItemsDatabase, PeopleDatabase)
