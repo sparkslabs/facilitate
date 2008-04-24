@@ -213,7 +213,7 @@ def RenderedTuple(environ, relationkey, missionstepid, LeftDB, RightDB):
                                          }] )
     return dataentry
 
-def RenderedRelationEntryForm(environ, LeftRelationName, RightRelationName, LeftDB, RightDB, **extra_args):
+def RenderedRelationEntryForm(environ, LeftRelationName, RightRelationName, leftkey,rightkey, LeftDB, RightDB, **extra_args):
 
 
     LeftTuples = LeftDB.read_database()
@@ -222,11 +222,15 @@ def RenderedRelationEntryForm(environ, LeftRelationName, RightRelationName, Left
     os.sys.stderr.write(str(LeftRelationName)+"\n")
     empty_data_entry = Template ( file = "templates/Relations.Items.Edit.tmpl",
                                  searchList = [
-                                     environ, {
-                                       "leftdb_id":LeftRelationName,
+                                     environ,  {
+                                       "leftdb_id" : LeftRelationName,
                                        "rightdb_id": RightRelationName,
-                                       "LeftItems":LeftTuples,
-                                       "RightItems":RightTuples,
+                                       "leftkey":leftkey,
+                                       "rightkey":rightkey,
+                                       "LeftItems" : LeftTuples,
+                                       "RightItems" : RightTuples,
+                                       "left_itemkeys":LeftTuples[0].keys,
+                                       "right_itemkeys":RightTuples[0].keys
                                      }, extra_args
                                  ]
                                )
@@ -270,17 +274,18 @@ def page_render_html(json, **argd):
         rightdbid= argd.get("form.rightid")
         leftdb_key  = get_itemtype_key(leftdbid)
         rightdb_key = get_itemtype_key(rightdbid)
-        available_relations = RenderedRelation(R, leftdbid, rightdbid)
+       
         #os.sys.stderr.write(leftdb_key+" "+rightdb_key+ "\n")
         leftdb = EntitySet(leftdbid,key=leftdb_key)
         rightdb = EntitySet(rightdbid,key=rightdb_key)
         #relation = RenderedRelation(R,leftdb, rightdb )
-        empty_data_entry = RenderedRelationEntryForm( argd["__environ__"], leftdbid, rightdbid, leftdb, rightdb)
-        os.sys.stderr.write("empty data entry returned \n")
-        os.sys.stderr.write(repr(empty_data_entry))
-        configured_form  = R.render_configured_item_form(empty_data_entry,nextstep="create_new",submitlabel="Add Item")
+        available_relations = RenderedRelation(R, leftdb, rightdb)
+        empty_data_entry = RenderedRelationEntryForm( argd["__environ__"], leftdbid, rightdbid,leftdb_key,rightdb_key, leftdb, rightdb)
+        #os.sys.stderr.write("empty data entry returned \n")
+        #os.sys.stderr.write(repr(empty_data_entry))
+        configured_form  = R.render_configured_item_form(empty_data_entry ,nextstep="create_new",submitlabel="Add Item")
 
-        return R.render_page(content=rendered_relations, dataentry=configured_form)
+        return R.render_page(content=available_relations, dataentry=configured_form)
 
     if action == "view":
         people = RenderedRelation(R, ItemsDatabase, PeopleDatabase)

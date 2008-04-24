@@ -4,8 +4,9 @@
 #def $relationid: -1
 #def $pretext: Create relation between:
 #def $fortext: Items in 
-#def $intertext: and items in 
-#def $left_dbid: &nbsp;
+#def $context:and 
+#def $intertext: items in 
+##def $left_dbid: &nbsp;
 ##def $rightdbid: &nbsp;
 
 <input type="hidden" name="$(form).relationid" value="$relationid" />
@@ -14,28 +15,41 @@
 $fortext
 #if $relationid != "-1"
 $relationid
-$left_dbid
 #end if
+$leftdb_id
 <select name="$(form).leftid">
 #for $item in $LeftItems
-<option value="$item["commentid"]"
-#if $item["commentid"] == $leftselected
+<option value="$item[$leftkey]"
+#if $item[$leftkey] == $leftselected
 selected
 #end if
-##>$item["comment"],  $item["shortdescription"]</option>
+#>#for $key in $left_itemkeys
+     $item[$key]
+     #end for
+</option>
 #end for
 </select>
+<P>
+$context
+<P>
 $intertext
+$rightdb_id
 <select name="$(form).rightid">
-#for $person in $RightItems
-<option value="$person["commentid"]"
-#if $person["commentid"] == $rightselected
+#for $item in $RightItems
+<option value="$item[$rightkey]"
+#if $item[$rightkey] == $rightselected
 selected
 #end if
-##>$person["comment"],  $person["shortdescription"]</option>
+#>#for $key in $right_itemkeys
+     $item[$key]
+     #end for
+</option>
 #end for
 </select>
 </ul>
+
+##for $key in $left_itemkeys
+##>$item["comment"],  $item["shortdescription"]</option>
 ##<table>
 ##<tr><td> Condition Description</td><td> <input type="text" name="$(form).humancondition" value="$humancondition" size="30"/> </td></tr>
 ##<tr><td> Condition Filter</td><td> <input type="text" name="$(form).machinecondition" value="$machinecondition" size="30"/> </td></tr>
