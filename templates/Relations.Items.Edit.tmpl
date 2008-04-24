@@ -10,14 +10,16 @@
 ##def $rightdbid: &nbsp;
 
 <input type="hidden" name="$(form).relationid" value="$relationid" />
+<input type="hidden" name="$(form).left_dbid" value="$left_dbid" />
+<input type="hidden" name="$(form).right_dbid" value="$right_dbid" />
 <P>$pretext
 <ul>
 $fortext
 #if $relationid != "-1"
 $relationid
 #end if
-$leftdb_id
-<select name="$(form).leftid">
+$left_dbid
+<select name="$(form).left_itemid">
 #for $item in $LeftItems
 <option value="$item[$leftkey]"
 #if $item[$leftkey] == $leftselected
@@ -33,8 +35,8 @@ selected
 $context
 <P>
 $intertext
-$rightdb_id
-<select name="$(form).rightid">
+$right_dbid
+<select name="$(form).right_itemid">
 #for $item in $RightItems
 <option value="$item[$rightkey]"
 #if $item[$rightkey] == $rightselected

@@ -223,8 +223,8 @@ def RenderedRelationEntryForm(environ, LeftRelationName, RightRelationName, left
     empty_data_entry = Template ( file = "templates/Relations.Items.Edit.tmpl",
                                  searchList = [
                                      environ,  {
-                                       "leftdb_id" : LeftRelationName,
-                                       "rightdb_id": RightRelationName,
+                                       "left_dbid" : LeftRelationName,
+                                       "right_dbid": RightRelationName,
                                        "leftkey":leftkey,
                                        "rightkey":rightkey,
                                        "LeftItems" : LeftTuples,
@@ -266,7 +266,7 @@ def page_render_html(json, **argd):
 
     if action == "edit_items":
         relations = read_database()
-         #rendered_relations  = R.rendered_record_list(relations)  # need generalised RenderedRealtion here
+        #rendered_relations  = R.rendered_record_list(relations)  # need generalised RenderedRealtion here
         #os.sys.stderr.write(argd.get("form.leftid")+"\n")
         #os.sys.stderr.write(argd.get("form.rightid")+"\n")
         
@@ -313,14 +313,15 @@ def page_render_html(json, **argd):
         return R.render_page(content=people, dataentry=configured_form)
 
     if action == "create_new":
-        os.sys.stderr.write(argd.get("form.leftid"))
+        os.sys.stderr.write(argd.get("form.left_dbid")+"\n")
+        os.sys.stderr.write(argd.get("form.right_dbid")+"\n")
         new_item = make_item(stem="form", **argd) # This also stores them in the database
 		#available_relations = R.rendered_itemtypes(itemtypes)
-        people = RenderedRelation(R, ItemsDatabase, PeopleDatabase)
-        rendered_tuple = RenderedTuple(argd["__environ__"],"missionstepid", new_item["missionstepid"], ItemsDatabase, PeopleDatabase)
-        rendered_tuple = "<B> Record Saved </B>. If you wish to update, please do" + str(rendered_tuple)
+        #people = RenderedRelation(R, ItemsDatabase, PeopleDatabase)
+        #rendered_tuple = RenderedTuple(argd["__environ__"],"missionstepid", new_item["missionstepid"], ItemsDatabase, PeopleDatabase)
+        #rendered_tuple = "<B> Record Saved </B>. If you wish to update, please do" + str(rendered_tuple)
 
-        return R.render_page(content=people, dataentry=rendered_tuple)
+        return R.render_page(content="pop") #people, dataentry=rendered_tuple)
 
     if action == "update":
         # Take the data sent to us, and use that to fill out an edit form
