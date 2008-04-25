@@ -36,13 +36,50 @@ def get_itemtypes():               # Prolly should get moved to Record.py
 
 def get_itemtype_key(item_type):    # Prolly should get moved to Record.py
     try:                            # can have empty data_item directory
-         F = open("data/"+item_type+"/.meta") 
-         item_type_key = cjson.decode(F.read())["key"]
+        F = open("data/"+item_type+"/.meta") 
+        item_type_key = cjson.decode(F.read())["key"]
+        F.close()
     except:
-         item_type_key = None
-    F.close()
+        item_type_key = None 
     return item_type_key
 
+def get_item_record(db_id,item_id):  # Prolly should get moved to Record.py
+    try:                             # in case file goes away?
+        F = open("data/"+db_id+"/"+item_id) 
+        item_record = cjson.decode(F.read())
+        F.close()
+    except:
+        item_record = None
+    return item_record
+
+def get_item_type_keys(db_id,item_id): # Prolly should get moved to Record.py
+    try:                               # keys added to .meta? can't rely on a record being present?
+        F=open('data/'+db_id+'/'+item_id)
+        item_type_keys = cjson.decode(F.read()).keys()
+        F.close()
+    except:
+        item_type_keys = None
+    return item_type_keys
+
+
+def get_item_values(db_id,item_id,record): # Prolly should get moved to Record.py
+    try: 
+        F = open('data/'+db_id+'/'+item_id)
+        record_values = cjson.decode(F.read())
+        F.close()
+    except:
+        record_values = None
+    return record_values
+        
+
+def get_item_record_pair(relation):   # Prolly should get moved to Record.py
+    left_dbid = relation['left_dbid']
+    right_dbid = relation['right_dbid']
+    left_itemid = relation['left_itemid']
+    right_itemid = relation['right_itemid']
+    left_item_record = get_item_record(left_dbid,left_itemid)
+    right_item_record = get_item_record(right_dbid,right_itemid)
+    return [left_item_record, right_item_record]
 
 def make_item(stem="form", **argd):
     new_item = {
@@ -93,6 +130,16 @@ class RelationRender(object):
         rendered_relations = Template ( file = self.record_listview_template,
                             searchList = [self.environ, {"relations": relations}] )
         return rendered_relations
+
+    def rendered_relations_list(self,relations):
+        rendered_relations = []
+        for relation in relations:
+            rendered_relations.append(get_item_record_pair(relation))    
+        return rendered_relations
+
+
+            
+            
 
     def rendered_itemtypes(self,itemtypes):
          rendered_itemtypes = Template( file = self.itemtypes_view_template,
@@ -187,8 +234,8 @@ def RenderedRelation(R, LeftDB, RightDB):
    # people                = R.rendered_record_list(addresses, X, Y)
     return None #people
 
-def RenderedTuple(environ, relationkey, missionstepid, LeftDB, RightDB):
-    missionstep = get_item(missionstepid)
+def RenderedTuple(environ, relationkey, relationid, LeftDB, RightDB):
+    relation = get_item(relationid)
 
     leftRecord= LeftDB.get_record(missionstep["leftid"])
     rightRecord = RightDB.get_record(missionstep["rightid"])
@@ -210,6 +257,26 @@ def RenderedTuple(environ, relationkey, missionstepid, LeftDB, RightDB):
                                               "humancondition" :missionstep["humancondition"] ,
                                               "machinecondition" :missionstep["machinecondition"],
 
+                                         }] )
+    return dataentry
+
+def RenderedRelationPair(environ,relation, relationpair):
+    leftRecord = relationpair[0]
+    rightRecord = relationpair[1]
+    left_vals = get_item_values(relation['left_dbid'],relation['left_itemid'],leftRecord)
+    right_vals = get_item_values(relation['right_dbid'],relation['right_itemid'],rightRecord)
+    left_keys = get_item_type_keys(relation['left_dbid'],relation['left_itemid'])
+    right_keys = get_item_type_keys(relation['right_dbid'],relation['right_itemid'])
+    dataentry = Template ( file = 'templates/RelationPair.View.tmpl',
+                           searchList = [environ,
+                                         #left,
+                                         #right,
+                                         {
+                                              "relation" : "This relates",
+                                               "LeftVals":left_vals,
+                                               "RightVals":right_vals,
+                                               "left_itemkeys":left_keys,
+                                               "right_itemkeys":right_keys,
                                          }] )
     return dataentry
 
@@ -287,11 +354,17 @@ def page_render_html(json, **argd):
 
         return R.render_page(content=available_relations, dataentry=configured_form)
 
-    if action == "view":
-        people = RenderedRelation(R, ItemsDatabase, PeopleDatabase)
-        rendered_tuple = RenderedTuple(argd["__environ__"],"missionstepid", argd["missionstepid"], ItemsDatabase, PeopleDatabase)
+    if action == "view_relation":
+        relation = get_item(argd["relationid"])
+        relation_pair = get_item_record_pair(relation)
+        
+        rendered_relation_pair = RenderedRelationPair(R,relation, relation_pair)
+        
+    #rendered_relation_pair = None
+        #people = RenderedRelation(R, ItemsDatabase, PeopleDatabase)
+        #rendered_tuple = RenderedTuple(argd["__environ__"],"missionstepid", argd["missionstepid"], ItemsDatabase, PeopleDatabase)
 
-        return R.render_page(content=people, dataentry=rendered_tuple)
+        return R.render_page(content="relations", dataentry=rendered_relation_pair)
 
    
     if action == "edit":
