@@ -14,12 +14,25 @@
 #def $addmsmission: <a href="$addmsmissionurl">Add</a>
 #def $msmissionshomelink: <a href="$msmissionsappurl">Home</a>
 
+## Groups
+#def $groupsappurl: /cgi-bin/app/groups
+#def $addgroupurl: $groupsappurl?formtype=edit_new
+#def $addgroup: <a href="$addgroupurl">Add</a>
+#def $groupshomelink:  <a href="$groupsappurl">Home</a>
 
+## Groups Members 
+#def $groupsmembersappurl: /cgi-bin/app/groupsmembers
+#def $addgroupmemberurl: $groupsmembersappurl?formtype=edit_new
+#def $addgroupmember: <a href="$addgroupmemberurl">Add</a>
+#def $groupsmembershomelink:  <a href="$groupsmembersappurl">Home</a>
+
+## Relations
 #def $relationsappurl: /cgi-bin/app/relations
 #def $addrelationurl: $relationsappurl?formtype=edit_new
 #def $addrelation: <a href="$addrelationurl">Add</a>
 #def $relationshomelink: <a href="$relationsappurl">Home</a>
 
+## Person
 #def $addpersonurl: $peopleappurl?formtype=edit_new_person
 #def $addperson: <a href="$addpersonurl">Add</a>
 #def $peoplehomelink: <a href="$peopleappurl">Home</a>
@@ -28,22 +41,27 @@
 #def $additem: <a href="$additemurl">Add</a>
 #def $itemshomelink: <a href="$itemsappurl">Home</a>
 
+## Item
 #def $additem_personurl: $items_peopleappurl?formtype=edit_new
 #def $additem_person: <a href="$additem_personurl">Add</a>
 #def $items_peoplehomelink: <a href="$items_peopleappurl">Home</a>
 
+## Mission
 #def $addmissionurl: $missionsappurl?formtype=edit_new
 #def $addmission: <a href="$addmissionurl">Add</a>
 #def $missionshomelink: <a href="$missionsappurl">Home</a>
 
+## Missionstep
 #def $addmissionsstepurl: $missionsstepsappurl?formtype=edit_new
 #def $addmissionstep: <a href="$addmissionsstepurl">Add</a>
 #def $missionsstepshomelink: <a href="$missionsstepsappurl">Home</a>
 
+##SimpleMission
 #def $addsimplemissionurl: $wizardsappurl?formtype=edit_new_simplemission&amp;steps=5
 #def $addsimplemission: <a href="$addsimplemissionurl">Simple Mission</a>
 #def $authoringapphomelink: <a href="$wizardsappurl">Home</a>
 
+##Comment
 #def $addcommenturl: $commentsappurl?formtype=edit_new_comment
 #def $addcomment: <a href="$addcommenturl">Add</a>
 #def $commentapphomelink: <a href="$commentsappurl">Home </a>
@@ -52,20 +70,30 @@
 
 #def $pretext:
 <table><tr>
+
 <td align="center" style="border: 3px solid; padding: 8;"> People<br>($peoplehomelink | $addperson ) </td>
+
 <td align="center" style="border: 3px solid; padding: 8;"> Items<br>( $itemshomelink | $additem ) </td>
+
 <td align="center" style="border: 3px solid; padding: 8;"> ItemPerson<br>( $items_peoplehomelink | $additem_person ) </td>
+
 <td align="center" style="border: 3px solid; padding: 8;"> Mission<br>($missionshomelink | $addmission) </td>
+
 <td align="center" style="border: 3px solid; padding: 8;"> Mission Step<br>($missionsstepshomelink | $addmissionstep ) </td>
+
 <td align="center" style="border: 3px solid; padding: 8;"> Wizards<br>($authoringapphomelink | $addsimplemission ) </td>
+
 <td align="center" style="border: 3px solid; padding: 8;"> Comments<br>($commentapphomelink | $addcomment ) </td>
 
-<!-- Also added this line -->
-<td align="center" style="border: 3px solid; padding: 8;"> Relations<br>($relationshomelink | $addrelation ) </td>
+<td align="center" style="border: 3px solid; padding: 8;"> Relations <br>($relationshomelink | $addrelation ) </td>
+
+<td align="center" style="border: 3px solid; padding: 8;"> Groups  <br>($groupshomelink | $addgroup) </td>
+
+<td align="center" style="border: 3px solid; padding: 8;"> Groups Members <br>($groupsmembershomelink | $addgroupmember) </td>
+
 <td align="center" style="border: 3px solid; padding: 8;"> MsMission<br>($msmissionshomelink | $addmsmission) </td>
-
-
 </tr></table>
+
 #end def
 #def $content: <p>
 #def $dataentry: <p>

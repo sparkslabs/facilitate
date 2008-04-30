@@ -1,3 +1,4 @@
+#def $appurl: $SCRIPT_NAME
 #def $form: form
 #def $relation: &nbsp;
 #def $relationid: -1
@@ -6,7 +7,8 @@
 ##def $longdescription: &nbsp;
 ##def $basemsmission   : &nbsp;
 #def $appurl: /cgi-bin/app/relations
-
+$relationid
+<input type="hidden" name="$(form).relationid" value="$relationid" /> 
 <h1> $relation </h1>
 <P><i> <a href='$appurl?formtype=edit_relation&relationid=$relationid'>edit</a>, <a href='$appurl?formtype=delete_relation&relationid=$relationid'>delete</a> </i>
 <P>$relation["left_dbid"] 

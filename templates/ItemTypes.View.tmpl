@@ -1,7 +1,7 @@
 #def $form: form
 #def $appurl: /cgi-bin/app/relations
 #def $viewurl: $appurl?formtype=view&itemid=
-#def $relationid: None
+#def $relationid: -1
 #def $leftselected: None
 #def rightselected: None
 #def $pretext: Define relation 
@@ -13,9 +13,9 @@
 <P>$pretext
 <input type="hidden" name="$(form).relationid" value="$relationid" />
 
-#if $relationid != "-1"
+##if $relationid != "-1"
 $relationid
-#end if
+##end if
 $intertext
 <select name="$(form).leftid">
 #for $item in $itemtypes

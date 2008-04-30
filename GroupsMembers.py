@@ -7,19 +7,18 @@ import os
 
 RelationSet = EntitySet
 
-MissionStepsRelation = RelationSet("missionsteps_relation",key="missionstepid")
-ItemsDatabase = EntitySet("missions",key="missionid")
-PeopleDatabase = EntitySet("missions",key="missionid")
+GroupsMembers = RelationSet("groupsmembers",key="groupid")
+PeopleDatabase = EntitySet("people",key="personid")
 
 #
 # This lot need dealing with more sensibly
 #
 
-def store_new_item(the_item): return MissionStepsRelation.new_record(the_item)
-def read_database(): return MissionStepsRelation.read_database()
-def store_item(item): return MissionStepsRelation.store_record(item)
-def get_item(item): return MissionStepsRelation.get_record(item)
-def delete_item(item): return MissionStepsRelation.delete_record(item)
+def store_new_item(the_item): return GrouspMembers.new_record(the_item)
+def read_database(): return GroupsMembers.read_database()
+def store_item(item): return GroupsMembers.store_record(item)
+def get_item(item): return GroupsMembers.get_record(item)
+def delete_item(item): return GroupsMembers.delete_record(item)
 
 #
 # Map web request to data layer
@@ -27,12 +26,8 @@ def delete_item(item): return MissionStepsRelation.delete_record(item)
 
 def make_item(stem="form", **argd):
     new_item = {
-#        ItemsDatabase.key() : argd.get(stem + "."+ItemsDatabase.key(),""),
-#        PeopleDatabase.key() : argd.get(stem + "."+PeopleDatabase.key(),""),
-        "leftid" : argd.get(stem + ".leftid",""),
-        "rightid"  : argd.get(stem + ".rightid",""),
-        "humancondition" : argd.get(stem + ".humancondition",""),
-        "machinecondition"  : argd.get(stem + ".machinecondition",""),
+        "groupname" : argd.get(stem + ".groupname",""),
+        "personid"  : argd.get(stem + ".personid",""),
     }
     new_item = store_new_item(new_item)
     return new_item
@@ -43,11 +38,9 @@ def make_item(stem="form", **argd):
 
 def update_item(stem="form", **argd):
     the_item = {
-        "missionstepid" : argd.get(stem + ".missionstepid",""),
-        "leftid" : argd.get(stem + ".leftid",""),
-        "rightid"  : argd.get(stem + ".rightid",""),
-        "humancondition" : argd.get(stem + ".humancondition",""),
-        "machinecondition"  : argd.get(stem + ".machinecondition",""),
+        "groupipid" : argd.get(stem + ".groupid",""),
+        "groupname" : argd.get(stem + ".groupname",""),
+        "personid"  : argd.get(stem + ".personid",""),
     }
     store_item(the_item)
     return the_item
@@ -57,13 +50,15 @@ def update_item(stem="form", **argd):
 #
 
 class RelationRender(object):
-    record_listview_template = 'templates/MissionSteps.View.tmpl'
-    record_editget_template = 'templates/MissionStep.Edit.tmpl' # Used ?
-    record_view_template = 'templates/MissionStep.View.tmpl'
+    record_listview_template = 'templates/GroupsMembers.View.tmpl'
+    record_editget_template = 'templates/GroupMembers.Edit.tmpl' # Used ?
+    record_view_template = 'templates/GroupMembers.View.tmpl'
     record_editpost_template = 'templates/Form.tmpl'         # Posting bulk content...
     page_template = 'templates/Page.tmpl'
-    leftfields = ["mission", "shortdescription"]
-    rightfields = ["mission", "shortdescription"]
+    leftfields = ["person","house","street"]
+    left_id    = ["personid"]
+    rightfields = ["groupname"]
+    right_id    = ["groupid"]
 
     def __init__(self, environ):
         self.environ = environ
@@ -144,7 +139,7 @@ def RenderedTuple(environ, relationkey, missionstepid, LeftDB, RightDB):
     for K in leftRecord: left["left_"+K] = leftRecord[K]
     for K in rightRecord: right["right_"+K] = rightRecord[K]
 
-    dataentry = Template ( file = 'templates/MissionStep.View.tmpl',
+    dataentry = Template ( file = 'templates/GroupMembers.View.tmpl',
                            searchList = [environ,
                                          left,
                                          right,
@@ -163,7 +158,7 @@ def RenderedRelationEntryForm(environ, LeftRelationName, RightRelationName, Left
     LeftTuples = LeftDB.read_database()
     RightTuples = RightDB.read_database()
 
-    empty_data_entry = Template ( file = "templates/MissionStep.Edit.tmpl",
+    empty_data_entry = Template ( file = "templates/GroupMembers.Edit.tmpl",
                                  searchList = [
                                      environ, {
                                        "Items":LeftTuples,
@@ -179,25 +174,25 @@ def page_render_html(json, **argd):
     R = RelationRender(argd["__environ__"])
 
     if action == "overview":
-        people = str(RenderedRelation(R, ItemsDatabase, PeopleDatabase))
+        groupsmembers = str(RenderedRelation(R, GroupsMembers, PeopleDatabase))
 
-        X = R.render_page(content=people)
+        X = R.render_page(content=groupsmembers)
         return X
 
     if action == "view":
 
-        people = RenderedRelation(R, ItemsDatabase, PeopleDatabase)
-        rendered_tuple = RenderedTuple(argd["__environ__"],"missionstepid", argd["missionstepid"], ItemsDatabase, PeopleDatabase)
+        groupsmembers = RenderedRelation(R, GroupsMembers, PeopleDatabase)
+        rendered_tuple = RenderedTuple(argd["__environ__"],"missionstepid", argd["missionstepid"], GroupsMembers, PeopleDatabase)
 
-        return R.render_page(content=people, dataentry=rendered_tuple)
+        return R.render_page(content=groupsmembers, dataentry=rendered_tuple)
 
     if action == "edit_new":
-        people = RenderedRelation(R, ItemsDatabase, PeopleDatabase)
+        groupsmembers = RenderedRelation(R, GroupsMembers, PeopleDatabase)
 
-        empty_data_entry = RenderedRelationEntryForm( argd["__environ__"], "Items", "People", ItemsDatabase, PeopleDatabase)
+        empty_data_entry = RenderedRelationEntryForm( argd["__environ__"], "Items", "People",GroupsMembers, PeopleDatabase)
         configured_form  = R.render_configured_form(empty_data_entry,submitlabel="Add Item")
 
-        return R.render_page(content=people, dataentry=configured_form)
+        return R.render_page(content=groupsmembers, dataentry=configured_form)
 
     if action == "edit":
         item_person = get_item(argd["missionstepid"])
@@ -286,8 +281,6 @@ def page_render_html(json, **argd):
                           ] ))
 
 if __name__ == "__main__":
-
     print "Content-Type: text/html"
     print
-
     print page_render_html({})

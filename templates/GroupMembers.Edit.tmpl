@@ -1,0 +1,38 @@
+#def $form: form
+#def $leftselected: None
+#def $rightselected: None
+#def $groupid: -1
+#def $pretext: Create mission step between:
+#def $humancondition: &nbsp;
+#def $machinecondition: &nbsp;
+
+<input type="hidden" name="$(form).groupid" value="$groupid" />
+<P>$pretext
+<ul>
+#if $groupid != "-1"
+$groupidpid
+#end if
+<select name="$(form).leftid">
+#for $item in $Items
+<option value="$item["groupid"]"
+#if $item["groupid"] == $leftselected
+selected
+#end if
+>$item["group"],  $item["groupname"]</option>
+#end for
+</select>
+
+<select name="$(form).rightid">
+#for $person in $People
+<option value="$person["personid"]"
+#if $person["personid"] == $rightselected
+selected
+#end if
+>$person["person"],  $person["person"]</option>
+#end for
+</select>
+</ul>
+<table>
+<tr><td> Condition Description</td><td> <input type="text" name="$(form).humancondition" value="$humancondition" size="30"/> </td></tr>
+<tr><td> Condition Filter</td><td> <input type="text" name="$(form).machinecondition" value="$machinecondition" size="30"/> </td></tr>
+</table>
