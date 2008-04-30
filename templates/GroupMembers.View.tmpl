@@ -1,9 +1,11 @@
 #def $appurl: $SCRIPT_NAME
 #def $form: form
-#def $itempersonid: -1
+##def $groupmemberid: -1
 #def $relation: &nbsp;
 #def $humancondition: &nbsp;
 #def $machinecondition: &nbsp;
+#def $groupname: &nbsp;
+#def $person: &nbsp;
 
 ## All attributes from left relation prefixed "left_"
 ## All attributes from right relation prefixed "right_"
@@ -22,13 +24,14 @@
 
 #def $upload_base_url: /
 
-<h1>Relation : $relation, $missionstepid</h1>
+<h1>Group member : $relation $groupmemberid</h1>
 
 <P> Transitions because: $humancondition<br>
 (code: $machinecondition )
 
 <ul>
-<P><i> <a href='$appurl?formtype=edit&amp;missionstepid=$missionstepid'>edit</a>, <a href='$appurl?formtype=delete_item&amp;missionstepid=$missionstepid'>delete</a> </i>
+$groupname $person
+<P><i> <a href='$appurl?formtype=edit&amp;groupmemberid=$groupmemberid'>edit</a>, <a href='$appurl?formtype=delete_item&amp;groupmemberid=$groupmemberid'>delete</a> </i>
 <div style="width:50%; float: left">
 <h1> $left_mission </h1>
 <P><i>$left_shortdescription</i>

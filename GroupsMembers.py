@@ -7,14 +7,15 @@ import os
 
 RelationSet = EntitySet
 
-GroupsMembers = RelationSet("groupsmembers",key="groupid")
+GroupsMembers = RelationSet("groupsmembers",key="groupmemberid")
+GroupsDatabase = EntitySet("groups",key="groupid")
 PeopleDatabase = EntitySet("people",key="personid")
 
 #
 # This lot need dealing with more sensibly
 #
 
-def store_new_item(the_item): return GrouspMembers.new_record(the_item)
+def store_new_item(the_item): return GroupsMembers.new_record(the_item)
 def read_database(): return GroupsMembers.read_database()
 def store_item(item): return GroupsMembers.store_record(item)
 def get_item(item): return GroupsMembers.get_record(item)
@@ -26,7 +27,7 @@ def delete_item(item): return GroupsMembers.delete_record(item)
 
 def make_item(stem="form", **argd):
     new_item = {
-        "groupname" : argd.get(stem + ".groupname",""),
+        "groupid" : argd.get(stem + ".groupid",""),
         "personid"  : argd.get(stem + ".personid",""),
     }
     new_item = store_new_item(new_item)
@@ -38,8 +39,8 @@ def make_item(stem="form", **argd):
 
 def update_item(stem="form", **argd):
     the_item = {
-        "groupipid" : argd.get(stem + ".groupid",""),
-        "groupname" : argd.get(stem + ".groupname",""),
+        "groupmemberid" : argd.get(stem + ".groupmemberid",""),
+        "groupid" : argd.get(stem + ".groupid",""),
         "personid"  : argd.get(stem + ".personid",""),
     }
     store_item(the_item)
@@ -55,10 +56,10 @@ class RelationRender(object):
     record_view_template = 'templates/GroupMembers.View.tmpl'
     record_editpost_template = 'templates/Form.tmpl'         # Posting bulk content...
     page_template = 'templates/Page.tmpl'
-    leftfields = ["person","house","street"]
-    left_id    = ["personid"]
-    rightfields = ["groupname"]
-    right_id    = ["groupid"]
+    rightfields = ["person","house","street"]    # 
+    right_id    = ["personid"]
+    leftfields = ["groupname"]
+    left_id    = ["groupid"]
 
     def __init__(self, environ):
         self.environ = environ
@@ -129,8 +130,8 @@ def RenderedRelation(R, LeftDB, RightDB):
 def RenderedTuple(environ, relationkey, missionstepid, LeftDB, RightDB):
     missionstep = get_item(missionstepid)
 
-    leftRecord= LeftDB.get_record(missionstep["leftid"])
-    rightRecord = RightDB.get_record(missionstep["rightid"])
+    leftRecord= LeftDB.get_record(missionstep["groupid"])
+    rightRecord = RightDB.get_record(missionstep["personid"])
 #    leftRecord= LeftDB.get_record(missionstep[LeftDB.key()])
 #    rightRecord = RightDB.get_record(missionstep[RightDB.key()])
 
@@ -144,10 +145,10 @@ def RenderedTuple(environ, relationkey, missionstepid, LeftDB, RightDB):
                                          left,
                                          right,
                                          {
-                                              "relation" : "Mission Followed by",
+                                              #"relation" : "Mission Followed by",
                                               relationkey : missionstepid,
-                                              "humancondition" :missionstep["humancondition"] ,
-                                              "machinecondition" :missionstep["machinecondition"],
+                                              # "humancondition" :missionstep["humancondition"] ,
+                                              # "machinecondition" :missionstep["machinecondition"],
 
                                          }] )
     return dataentry
@@ -174,36 +175,36 @@ def page_render_html(json, **argd):
     R = RelationRender(argd["__environ__"])
 
     if action == "overview":
-        groupsmembers = str(RenderedRelation(R, GroupsMembers, PeopleDatabase))
+        groupsmembers = str(RenderedRelation(R, GroupsDatabase, PeopleDatabase))
 
         X = R.render_page(content=groupsmembers)
         return X
 
     if action == "view":
 
-        groupsmembers = RenderedRelation(R, GroupsMembers, PeopleDatabase)
-        rendered_tuple = RenderedTuple(argd["__environ__"],"missionstepid", argd["missionstepid"], GroupsMembers, PeopleDatabase)
+        groupsmembers = RenderedRelation(R, GroupsDatabase, PeopleDatabase)
+        rendered_tuple = RenderedTuple(argd["__environ__"],"groupmemberid", argd["groupmemberid"], GroupsDatabase, PeopleDatabase)
 
         return R.render_page(content=groupsmembers, dataentry=rendered_tuple)
 
     if action == "edit_new":
-        groupsmembers = RenderedRelation(R, GroupsMembers, PeopleDatabase)
+        groupsmembers = RenderedRelation(R, GroupsDatabase, PeopleDatabase)
 
-        empty_data_entry = RenderedRelationEntryForm( argd["__environ__"], "Items", "People",GroupsMembers, PeopleDatabase)
+        empty_data_entry = RenderedRelationEntryForm( argd["__environ__"], "Groups", "People",GroupsDatabase, PeopleDatabase)
         configured_form  = R.render_configured_form(empty_data_entry,submitlabel="Add Item")
 
         return R.render_page(content=groupsmembers, dataentry=configured_form)
 
     if action == "edit":
-        item_person = get_item(argd["missionstepid"])
+        item_person = get_item(argd["groupmemberid"])
 
-        people = RenderedRelation(R, ItemsDatabase, PeopleDatabase)
+        people = RenderedRelation(R, GroupsDatabase, PeopleDatabase)
 
-        pre_filled_data_entry = RenderedRelationEntryForm( argd["__environ__"], "Items", "People", ItemsDatabase, PeopleDatabase,
+        pre_filled_data_entry = RenderedRelationEntryForm( argd["__environ__"], "Items", "People", GroupsDatabase, PeopleDatabase,
                                                # This next bit prevents reuse...
-                                                     missionstepid = item_person["missionstepid"],
-                                                     leftselected = item_person["leftid"],
-                                                     rightselected = item_person["rightid"]
+                                                     missionstepid = item_person["groupmemberid"],
+                                                     leftselected = item_person["groupid"],
+                                                     rightselected = item_person["personid"]
                                                     )
 
         configured_form       = R.render_configured_form(pre_filled_data_entry,
@@ -216,8 +217,8 @@ def page_render_html(json, **argd):
 
         new_item = make_item(stem="form", **argd) # This also stores them in the database
 
-        people = RenderedRelation(R, ItemsDatabase, PeopleDatabase)
-        rendered_tuple = RenderedTuple(argd["__environ__"],"missionstepid", new_item["missionstepid"], ItemsDatabase, PeopleDatabase)
+        people = RenderedRelation(R, GroupsDatabase, PeopleDatabase)
+        rendered_tuple = RenderedTuple(argd["__environ__"],"groupmemberid", new_item["groupmemberid"], GroupsDatabase, PeopleDatabase)
         rendered_tuple = "<B> Record Saved </B>. If you wish to update, please do" + str(rendered_tuple)
 
         return R.render_page(content=people, dataentry=rendered_tuple)
@@ -231,8 +232,8 @@ def page_render_html(json, **argd):
         #
         theitem = update_item(stem="form", **argd)
 
-        people = RenderedRelation(R, ItemsDatabase, PeopleDatabase)
-        rendered_tuple = RenderedTuple(argd["__environ__"],"missionstepid", theitem["missionstepid"], ItemsDatabase, PeopleDatabase)
+        people = RenderedRelation(R,GroupsDatabase , PeopleDatabase)
+        rendered_tuple = RenderedTuple(argd["__environ__"],"groupmemberid", theitem["groupmemberid"], GroupsDatabase, PeopleDatabase)
         rendered_tuple = "<B> Record Saved </B>. If you wish to update, please do" + str(rendered_tuple)
 
         return R.render_page(content=people, dataentry=rendered_tuple)
@@ -245,14 +246,14 @@ def page_render_html(json, **argd):
         # yes...
         #
         # Show the database & a few options
-        item = get_item(argd["missionstepid"])
-        people = RenderedRelation(R, ItemsDatabase, PeopleDatabase)
+        item = get_item(argd["groupmemberid"])
+        people = RenderedRelation(R, GroupsDatabase, PeopleDatabase)
 
-        item_rendered = RenderedTuple(argd["__environ__"],"missionstepid", item["missionstepid"], ItemsDatabase, PeopleDatabase)
+        item_rendered = RenderedTuple(argd["__environ__"],"groupmemberid", item["groupmemberid"], GroupsDatabase, PeopleDatabase)
 
         prebanner = "<h3> Are you sure you wish to delete this item</h3>"
-        delete_action = "<a href='/cgi-bin/app/missionsteps?formtype=confirm_delete&missionstepid=%s'>%s</a>" % (item["missionstepid"], "Delete this item")
-        cancel_action = "<a href='/cgi-bin/app/missionsteps?formtype=view&missionstepid=%s'>%s</a>" % (item["missionstepid"], "Cancel deletion")
+        delete_action = "<a href='/cgi-bin/app/groupsmembers?formtype=confirm_delete&groupmemberid=%s'>%s</a>" % (item["groupmemberid"], "Delete this item")
+        cancel_action = "<a href='/cgi-bin/app/groupmembers?formtype=view&groupmemberid=%s'>%s</a>" % (item["groupmemberid"], "Cancel deletion")
 
         delete_message = "%s <ul> %s </ul><h3> %s | %s </h3>" % (prebanner, str(item_rendered), delete_action, cancel_action)
 
@@ -261,13 +262,13 @@ def page_render_html(json, **argd):
     if action == "confirm_delete":
         # Show the database & a few options
 
-        item = get_item(argd["missionstepid"])
+        item = get_item(argd["groupmemberid"])
 
-        delete_item(argd["missionstepid"])
+        delete_item(argd["groupmemberid"])
 
-        people = RenderedRelation(R, ItemsDatabase, PeopleDatabase)
+        people = RenderedRelation(R, GroupsDatabase, PeopleDatabase)
 
-        return R.render_page(content=people, dataentry="<h1> Record %s Deleted </h1>" % argd["missionstepid"])
+        return R.render_page(content=people, dataentry="<h1> Record %s Deleted </h1>" % argd["groupmemberid"])
 
     return str(Template ( file = 'templates/Page.tmpl', 
                          searchList = [
