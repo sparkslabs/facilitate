@@ -145,7 +145,7 @@ def RenderedTuple(environ, relationkey, missionstepid, LeftDB, RightDB):
                                          left,
                                          right,
                                          {
-                                              #"relation" : "Mission Followed by",
+                                              "relation" : "member number",
                                               relationkey : missionstepid,
                                               # "humancondition" :missionstep["humancondition"] ,
                                               # "machinecondition" :missionstep["machinecondition"],
@@ -202,7 +202,7 @@ def page_render_html(json, **argd):
 
         pre_filled_data_entry = RenderedRelationEntryForm( argd["__environ__"], "Items", "People", GroupsDatabase, PeopleDatabase,
                                                # This next bit prevents reuse...
-                                                     missionstepid = item_person["groupmemberid"],
+                                                     groupmemberid = item_person["groupmemberid"], # N.B. groupmemberid: etc. 
                                                      leftselected = item_person["groupid"],
                                                      rightselected = item_person["personid"]
                                                     )
