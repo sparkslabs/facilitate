@@ -1,31 +1,32 @@
 #def $form: form
 #def $leftselected: None
 #def $rightselected: None
-#def $groupmemberid: -1
-#def $pretext: Add person to group:
-#def $nameofgroup: Group name
+#def $treememberid: -1
+#def $pretext: Add person to tree:
+#def $nameoftree: Group name
 #def $nameofperson:  name of person to add 
 #def $humancondition: &nbsp;
 #def $machinecondition: &nbsp;
 #def $extraval:  None 
 
-<input type="hidden" name="$(form).groupmemberid" value="$groupmemberid" />
-##<input type="hidden" name="$(form).groupname" value="$groupname" />
+<input type="hidden" name="$(form).treememberid" value="$treememberid" />
+##<input type="hidden" name="$(form).treename" value="$treename" />
 <P>$pretext
 <ul>
-#if $groupmemberid != "-1"
-$groupmemberid
+#if $treememberid != "-1"
+$treememberid
 #end if
-$nameofgroup
-<select name="$(form).groupid">
+$nameoftree
+<select name="$(form).treeid">
 #for $item in $Items
-<option value="$item["groupid"]"
-#if  $item["groupid"]  == $leftselected
+<option value="$item["treeid"]"
+#if  $item["treeid"]  == $leftselected
 selected
 #end if
->  $item["groupname"] </option>
+>  $item["treename"] </option>
 #end for
 </select
+
 $nameofperson
 <select name="$(form).personid">
 #for $person in $People
@@ -42,5 +43,5 @@ selected
 ##<tr><td> Condition Filter</td><td> <input type="text" name="$(form).machinecondition" value="$machinecondition" size="30"/> </td></tr>
 ##</table>
 
-##$item["groupid"],
+##$item["treeid"],
 ##$person["person"], 

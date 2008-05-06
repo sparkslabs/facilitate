@@ -6,7 +6,11 @@
 #def $missionsstepsappurl: /cgi-bin/app/missionsteps
 #def $wizardsappurl: /cgi-bin/app/wizards
 #def $commentsappurl:/cgi-bin/app/comments
-
+#def $treesappurl: /cgi-bin/app/trees
+#def $treesmembersappurl: /cgi-bin/app/treesmembers
+#def $relationtreesappurl: /cgi-bin/app/relationtrees
+#def $groupsappurl: /cgi-bin/app/groups
+#def $groupsmembersappurl: /cgi-bin/app/groupsmembers
 
 ## Added these lines:
 #def $msmissionsappurl: /cgi-bin/app/msmissions
@@ -14,11 +18,37 @@
 #def $addmsmission: <a href="$addmsmissionurl">Add</a>
 #def $msmissionshomelink: <a href="$msmissionsappurl">Home</a>
 
+## Relation Trees
+#def $relationtreesappurl: /cgi-bin/app/relationtrees
+#def $addrelationtreeurl: $relationtreesappurl?formtype=edit_new
+#def $addrelationtree: <a href="$addrelationtreeurl">Add</a>
+#def $relationtreeshomelink:  <a href="$relationtreesappurl">Home</a>
+
+
+## Trees
+#def $relationtreesappurl: /cgi-bin/app/relationtrees
+#def $addrelationtreeurl: $relationtreesappurl?formtype=edit_new
+#def $addrelationtree: <a href="$addrelationtreeurl">Add</a>
+#def $relationtreeshomelink:  <a href="$relationtreesappurl">Home</a>
+
+## Trees
+#def $treesappurl: /cgi-bin/app/trees
+#def $addtreeurl: $treesappurl?formtype=edit_new
+#def $addtree: <a href="$addtreeurl">Add</a>
+#def $treeshomelink:  <a href="$treesappurl">Home</a>
+
+## Trees Members 
+#def $treesmembersappurl: /cgi-bin/app/treesmembers
+#def $addtreememberurl: $treesmembersappurl?formtype=edit_new
+#def $addtreemember: <a href="$addtreememberurl">Add</a>
+#def $treesmembershomelink:  <a href="$treesmembersappurl">Home</a>
+
 ## Groups
 #def $groupsappurl: /cgi-bin/app/groups
 #def $addgroupurl: $groupsappurl?formtype=edit_new
 #def $addgroup: <a href="$addgroupurl">Add</a>
 #def $groupshomelink:  <a href="$groupsappurl">Home</a>
+
 
 ## Groups Members 
 #def $groupsmembersappurl: /cgi-bin/app/groupsmembers
@@ -85,11 +115,17 @@
 
 <td align="center" style="border: 3px solid; padding: 8;"> Comments<br>($commentapphomelink | $addcomment ) </td>
 
-<td align="center" style="border: 3px solid; padding: 8;"> Relations <br>($relationshomelink | $addrelation ) </td>
+<td align="center" style="border: 3px solid; padding: 8;"> Relations (a bag) <br>($relationshomelink | $addrelation ) </td>
 
 <td align="center" style="border: 3px solid; padding: 8;"> Groups  <br>($groupshomelink | $addgroup) </td>
 
 <td align="center" style="border: 3px solid; padding: 8;"> Groups Members <br>($groupsmembershomelink | $addgroupmember) </td>
+
+<td align="center" style="border: 3px solid; padding: 8;"> Trees  <br>($treeshomelink | $addtree) </td>
+
+<td align="center" style="border: 3px solid; padding: 8;"> Trees Members <br>($treesmembershomelink | $addtreemember) </td>
+
+<td align="center" style="border: 3px solid; padding: 8;"> Relation Trees Members <br>($relationtreeshomelink | $addrelationtree) </td>
 
 <td align="center" style="border: 3px solid; padding: 8;"> MsMission<br>($msmissionshomelink | $addmsmission) </td>
 </tr></table>

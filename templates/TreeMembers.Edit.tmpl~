@@ -26,6 +26,7 @@ selected
 >  $item["groupname"] </option>
 #end for
 </select
+
 $nameofperson
 <select name="$(form).personid">
 #for $person in $People
