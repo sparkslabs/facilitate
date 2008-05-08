@@ -3,62 +3,54 @@
 from Cheetah.Template import Template
 from model.Record import EntitySet
 
-MsMissionsDatabase = EntitySet("msmissions",key="msmissionid")
+UsersDatabase = EntitySet("users",key="userid")
 
-def store_new_msmission(the_msmission): return MsMissionsDatabase.new_record(the_msmission)
-def read_database(): return MsMissionsDatabase.read_database()
-def store_msmission(msmission): return MsMissionsDatabase.store_record(msmission)
-def get_msmission(msmission): return MsMissionsDatabase.get_record(msmission)
-def delete_msmission(msmission): return MsMissionsDatabase.delete_record(msmission)
-
-#
-# Map web request to data layer
-#
-
-def make_msmission(stem="form", **argd):
-    new_msmission = {
-        "msmission" : argd.get(stem + ".msmission",""),
-        "shortdescription" : argd.get(stem + ".shortdescription",""),
-        "mediumdescription" : argd.get(stem + ".mediumdescription",""),
-        "longdescription": argd.get(stem + ".longdescription",""),
-        "basemsmission": argd.get(stem + ".basemsmission",""),
-    }
-    new_msmission = store_new_msmission(new_msmission)
-    return new_msmission
+def store_new_user(the_user): return UsersDatabase.new_record(the_user)
+def read_database(): return UsersDatabase.read_database()
+def store_user(user): return UsersDatabase.store_record(user)
+def get_user(user): return UsersDatabase.get_record(user)
+def delete_user(user): return UsersDatabase.delete_record(user)
 
 #
 # Map web request to data layer
 #
 
-def update_msmission(stem="form", **argd):
-    the_msmission = {
-        "msmissionid" : argd.get(stem + ".msmissionid",""),
-        "msmission" : argd.get(stem + ".msmission",""),
-        "shortdescription" : argd.get(stem + ".shortdescription",""),
-        "mediumdescription" : argd.get(stem + ".mediumdescription",""),
-        "longdescription": argd.get(stem + ".longdescription",""),
-        "basemsmission": argd.get(stem + ".basemsmission",""),
+def make_user(stem="form", **argd):
+    new_user = {
+        "username" : argd.get(stem + ".username",""),
     }
-    store_msmission(the_msmission)
-    return the_msmission
+    new_user = store_new_user(new_user)
+    return new_user
+
+#
+# Map web request to data layer
+#
+
+def update_user(stem="form", **argd):
+    the_user = {
+        "userid" : argd.get(stem + ".userid",""),
+        "username" : argd.get(stem + ".username",""),
+    }
+    store_user(the_user)
+    return the_user
 
 
 
 class RecordRender(object):
-    record_listview_template = 'templates/MsMissions.View.tmpl'
-    record_editget_template = 'templates/MsMission.Edit.tmpl'
-    record_view_template = 'templates/MsMission.View.tmpl'
+    record_listview_template = 'templates/Users.View.tmpl'
+    record_editget_template = 'templates/User.Edit.tmpl'
+    record_view_template = 'templates/User.View.tmpl'
     record_editpost_template = 'templates/Form.tmpl'         # Actually to do with a configured form isn't it...
-    page_template = 'templates/Page.tmpl'
+    page_template = 'templates/UserPage.tmpl'
 
     def __init__(self, environ,**argd):
         self.environ = environ
         self.__dict__.update(argd)
 
     def rendered_record_list(self, addresses):
-        msmissions = Template ( file = self.record_listview_template,
-                            searchList = [self.environ, {"msmissions": addresses}] )
-        return msmissions
+        users = Template ( file = self.record_listview_template,
+                            searchList = [self.environ, {"users": addresses}] )
+        return users
 
     def rendered_record_entry_form(self, item):
         dataentry = Template ( file = self.record_editget_template,
@@ -95,9 +87,12 @@ class RecordRender(object):
                                   }
                               ] ))
 
+    def user_exists(self):
+        return 
+
 
 #
-# Actually _MsMission_ Life Cycle Logic
+# Actually User Life Cycle Logic
 #
 
 def page_render_html(json, **argd):
@@ -106,17 +101,65 @@ def page_render_html(json, **argd):
     if action == "overview":
         # Show the database & a few options
         addresses = read_database()
-        msmissions                = R.rendered_record_list(addresses)
-        return R.render_page(content=msmissions)
+        users                = R.rendered_record_list(addresses)
+        return R.render_page(content=users)
 
+    if action == "user_greet":
+        dummy_content = "<B> User Landing Page </B>. next state is  user_login "
+        return R.render_page(content=dummy_content)
+
+    if action == "user_login":
+        dummy_content = "<B> User Login Page </B>. get login details next state is user_verify "
+        
+        if user_exists():
+            pass
+        return R.render_page(content=dummy_content)
+
+    if action == "user_verify":
+        dummy_content = "<B>  User Verify  </B>. if valid update user record, state next state is user_view else user_challenge"
+        return R.render_page(content=dummy_content)
+
+    if action == "user_view":
+        dummy_content = "<B> User View </B>. whatever this user can view or edit determined by owns and can view relations"
+        return R.render_page(content=dummy_content)
+
+    if action == "user_challenge":
+        dummy_content = "<B> User Challenge </B>. if lost password/username  next state is user_lost_password else user_create_new else bog off"  
+        return R.render_page(content=dummy_content)
+
+    if action == "user_verify":
+        dummy_content = "<B> User Challenge </B>. user_createnew"
+        return R.render_page(content=dummy_content)
+
+    if action == "user_create_new":
+        dummy_content = "<B> User Create New</B>. Create new  user in state pending "
+        return R.render_page(content=dummy_content)
+
+    if action == "user_validate_new":
+        dummy_content = "<B> Validate New  </B>.  next state is user_pending" 
+        return R.render_page(content=dummy_content)
+
+    if action == "user_logout":
+        dummy_content = "<B> Logout Page </B>.if logout update user record  next state is user greet"
+        return R.render_page(content=dummy_content)
+
+    if action == "user_lostpassword":
+        dummy_content = "<B> User lost password  </B>. user enters email ddress if valid send login else bog off"
+        return R.render_page(content=dummy_content)
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+  
+    
+ # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+ #                     original ms users below here                       #
+ # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
     if action == "edit_new":
-        # Show the database & a form for creating a new msmission
+        # Show the database & a form for creating a new user
         addresses = read_database()
-        msmissions           = R.rendered_record_list(addresses)
+        users           = R.rendered_record_list(addresses)
         empty_data_entry = R.rendered_record_entry_form({})
         configured_form  = R.render_configured_form(empty_data_entry)
 
-        return R.render_page(content=msmissions, dataentry=configured_form)
+        return R.render_page(content=users, dataentry=configured_form)
 
     if action == "create_new":
         # Take the data sent to us, and use that to fill out an edit form
@@ -124,53 +167,53 @@ def page_render_html(json, **argd):
         # If they submit the new form, the surely they should be viewed to be updating the form?
         # yes...
         #
-        new_msmission = make_msmission(stem="form", **argd) # This also stores them in the database
+        new_user = make_user(stem="form", **argd) # This also stores them in the database
 
         addresses = read_database()
-        msmissions                = R.rendered_record_list(addresses)
-        pre_filled_data_entry = R.rendered_record_entry_form(new_msmission)
+        users                = R.rendered_record_list(addresses)
+        pre_filled_data_entry = R.rendered_record_entry_form(new_user)
         configured_form       = R.render_configured_form(pre_filled_data_entry,
-                                                       nextstep="update_msmission",
+                                                       nextstep="update_user",
                                                        )
-        return R.render_page(content=msmissions, dataentry=configured_form)
+        return R.render_page(content=users, dataentry=configured_form)
 
-    if action == "view_msmission":
+    if action == "view_user":
         # Show the database & a few options
-        msmission = get_msmission(argd["msmissionid"])
+        user = get_user(argd["userid"])
         addresses = read_database()
-        msmissions                = R.rendered_record_list(addresses)
-        msmission_rendered = R.rendered_record(msmission)
+        users                = R.rendered_record_list(addresses)
+        user_rendered = R.rendered_record(user)
 
-        return R.render_page(content=msmissions, dataentry=msmission_rendered)
+        return R.render_page(content=users, dataentry=user_rendered)
 
-    if action == "edit_msmission":
-        msmission = get_msmission(argd["msmissionid"])
+    if action == "edit_user":
+        user = get_user(argd["userid"])
 
         addresses = read_database()
-        msmissions                = R.rendered_record_list(addresses)
-        pre_filled_data_entry = R.rendered_record_entry_form(msmission)
+        users                = R.rendered_record_list(addresses)
+        pre_filled_data_entry = R.rendered_record_entry_form(user)
         configured_form       = R.render_configured_form(pre_filled_data_entry,
-                                                       nextstep="update_msmission",
+                                                       nextstep="update_user",
                                                        )
-        return R.render_page(content=msmissions, dataentry=configured_form)
+        return R.render_page(content=users, dataentry=configured_form)
 
-    if action == "update_msmission":
+    if action == "update_user":
         # Take the data sent to us, and use that to fill out an edit form
         #
         # Note: This is actually filling in an *edit* form at that point, not a *new* user form
         # If they submit the new form, the surely they should be viewed to be updating the form?
         # yes...
         #
-        themsmission = update_msmission(stem="form", **argd)
+        theuser = update_user(stem="form", **argd)
 
         addresses = read_database()
-        msmissions                = R.rendered_record_list(addresses)
-        pre_filled_data_entry = R.rendered_record_entry_form(themsmission)
-        configured_form       = R.render_configured_form(pre_filled_data_entry,nextstep="update_msmission")
+        users                = R.rendered_record_list(addresses)
+        pre_filled_data_entry = R.rendered_record_entry_form(theuser)
+        configured_form       = R.render_configured_form(pre_filled_data_entry,nextstep="update_user")
 
-        return R.render_page(content=msmissions, dataentry=configured_form)
+        return R.render_page(content=users, dataentry=configured_form)
 
-    if action == "delete_msmission":
+    if action == "delete_user":
         # Take the data sent to us, and use that to fill out an edit form
         #
         # Note: This is actually filling in an *edit* form at that point, not a *new* user form
@@ -178,28 +221,28 @@ def page_render_html(json, **argd):
         # yes...
         #
         # Show the database & a few options
-        msmission = get_msmission(argd["msmissionid"])
+        user = get_user(argd["userid"])
         addresses = read_database()
-        msmissions                = R.rendered_record_list(addresses)
-        msmission_rendered = R.rendered_record(msmission)
-        msmission_rendered = "<h3> Are you sure you wish to delete this msmission?</h3><ul>" + str(msmission_rendered)
+        users                = R.rendered_record_list(addresses)
+        user_rendered = R.rendered_record(user)
+        user_rendered = "<h3> Are you sure you wish to delete this user?</h3><ul>" + str(user_rendered)
 
-        delete_action = "<a href='/cgi-bin/app/msmissions?formtype=confirm_delete_msmission&msmissionid=%s'>%s</a>" % (msmission["msmissionid"], "Delete this msmission")
-        cancel_action = "<a href='/cgi-bin/app/msmissions?formtype=view_msmission&msmissionid=%s'>%s</a>" % (msmission["msmissionid"], "Cancel deletion")
-        msmission_rendered += "</ul><h3> %s | %s </h3>" % (delete_action, cancel_action)
+        delete_action = "<a href='/cgi-bin/app/users?formtype=confirm_delete_user&userid=%s'>%s</a>" % (user["userid"], "Delete this user")
+        cancel_action = "<a href='/cgi-bin/app/users?formtype=view_user&userid=%s'>%s</a>" % (user["userid"], "Cancel deletion")
+        user_rendered += "</ul><h3> %s | %s </h3>" % (delete_action, cancel_action)
 
-        return R.render_page(content=msmissions, dataentry=msmission_rendered)
+        return R.render_page(content=users, dataentry=user_rendered)
 
-    if action == "confirm_delete_msmission":
+    if action == "confirm_delete_user":
         # Show the database & a few options
-        msmission = get_msmission(argd["msmissionid"])
-        delete_msmission(argd["msmissionid"])
+        user = get_user(argd["userid"])
+        delete_user(argd["userid"])
 
         addresses = read_database()
-        msmissions          = R.rendered_record_list(addresses)
-        msmission_rendered = R.rendered_record(msmission)
+        users          = R.rendered_record_list(addresses)
+        user_rendered = R.rendered_record(user)
 
-        return R.render_page(content=msmissions, dataentry="<h1> %s Deleted </h1>" % msmission["msmission"])
+        return R.render_page(content=users, dataentry="<h1> %s Deleted </h1>" % user["user"])
 
 
     return str(Template ( file = 'templates/Page.tmpl', 
