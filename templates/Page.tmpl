@@ -18,6 +18,12 @@
 #def $addmsmission: <a href="$addmsmissionurl">Add</a>
 #def $msmissionshomelink: <a href="$msmissionsappurl">Home</a>
 
+## Lists
+#def $listsappurl: /cgi-bin/app/lists
+#def $addlisturl: $listsappurl?formtype=edit_new
+#def $addlist: <a href="$addlisturl">Add</a>
+#def $listshomelink:  <a href="$listsappurl">Home</a>
+
 ## Relation Trees
 #def $relationtreesappurl: /cgi-bin/app/relationtrees
 #def $addrelationtreeurl: $relationtreesappurl?formtype=edit_new
@@ -126,6 +132,8 @@
 <td align="center" style="border: 3px solid; padding: 8;"> Trees Members <br>($treesmembershomelink | $addtreemember) </td>
 
 <td align="center" style="border: 3px solid; padding: 8;"> Relation Trees Members <br>($relationtreeshomelink | $addrelationtree) </td>
+
+<td align="center" style="border: 3px solid; padding: 8;"> Lists Members <br>($listshomelink | $addlist) </td>
 
 <td align="center" style="border: 3px solid; padding: 8;"> MsMission<br>($msmissionshomelink | $addmsmission) </td>
 </tr></table>
