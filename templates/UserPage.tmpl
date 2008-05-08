@@ -1,4 +1,5 @@
-#def $banner: Participate App V0: Users View
+#def $banner: Participate App V0 User View: 
+#def $userbanner: Welcome Participate User 
 #def $peopleappurl: /cgi-bin/app/people
 #def $itemsappurl: /cgi-bin/app/items
 #def $items_peopleappurl: /cgi-bin/app/items_people
@@ -11,6 +12,16 @@
 #def $relationtreesappurl: /cgi-bin/app/relationtrees
 #def $groupsappurl: /cgi-bin/app/groups
 #def $groupsmembersappurl: /cgi-bin/app/groupsmembers
+
+
+## User
+#def $usersappurl: /cgi-bin/app/users
+
+#def $userloginurl: $usersappurl?formtype=user_login
+#def $userlogouturl: $usersappurl?formtype=user_logout
+#def $userlogin: <a href="$userloginurl">Login</a>
+#def $userlogout: <a href="$userlogouturl">Logout</a>
+#def $usershomelink: <a href="$usersappurl">Home</a>
 
 ## Added these lines:
 #def $msmissionsappurl: /cgi-bin/app/msmissions
@@ -101,9 +112,7 @@
 #def $addcommenturl: $commentsappurl?formtype=edit_new_comment
 #def $addcomment: <a href="$addcommenturl">Add</a>
 #def $commentapphomelink: <a href="$commentsappurl">Home </a>
-
-
-
+## This needs to be modified to present the view determined by the owns and canview realtions 
 #def $pretext:
 <table><tr>
 
@@ -137,8 +146,17 @@
 
 <td align="center" style="border: 3px solid; padding: 8;"> MsMission<br>($msmissionshomelink | $addmsmission) </td>
 </tr></table>
-
 #end def
+
+## New second pretext for user login
+#def $userpretext:
+<table><tr>
+<td align="center" style="border: 3px solid; padding: 8;"> User<br>($usershomelink | $userlogin | $userlogout) </td>
+</tr></table>
+#end def
+
+
+
 #def $content: <p>
 #def $dataentry: <p>
 #def $extra: &nbsp;
@@ -146,15 +164,24 @@
 <html>
 <body>
 <h1> $banner </h1>
+#if $extra.user == "None"
+$userbanner
+$userpretext
+#else
+$user  user text here 
 $pretext
-
+#end if
 <ul>
 $content
 </ul>
 <hr>
 $dataentry
 <hr>
+#if $extra.user == "None"
+Log in and enjoy participate!
+#else
 $extra
+#end if
 <hr>
 <!--
 <P>

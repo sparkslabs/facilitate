@@ -18,6 +18,8 @@ def delete_user(user): return UsersDatabase.delete_record(user)
 def make_user(stem="form", **argd):
     new_user = {
         "username" : argd.get(stem + ".username",""),
+        "loggedin" : argd.get(stem + ".loggedin","pending"), # we create the user in the pending | loggedoff  state ?
+        "personid" : argd.get(stem + ".personid",""),        # a user is a person?
     }
     new_user = store_new_user(new_user)
     return new_user
@@ -30,16 +32,26 @@ def update_user(stem="form", **argd):
     the_user = {
         "userid" : argd.get(stem + ".userid",""),
         "username" : argd.get(stem + ".username",""),
+        "loggedin" : argd.get(stem + ".loggedin",""),      # state = "yes", "no", "pending"
+        "personid" : argd.get(stem + ".personid",""),      # a user is a person?
     }
     store_user(the_user)
     return the_user
 
-
+def dummy_user(stem="form", **argd):                       # a blank user to pass around
+    the_user = {
+        "userid" : argd.get(stem + ".userid",""),
+        "username" : argd.get(stem + ".username",""),
+        "loggedin" : argd.get(stem + ".loggedin","no"),    # state = "yes", "no", "pending"
+        "personid" : argd.get(stem + ".personid",""),      # a user is a person?
+    }
+    return the_user
 
 class RecordRender(object):
     record_listview_template = 'templates/Users.View.tmpl'
     record_editget_template = 'templates/User.Edit.tmpl'
     record_view_template = 'templates/User.View.tmpl'
+    record_user_login_template = 'templates/User.Login.tmpl'
     record_editpost_template = 'templates/Form.tmpl'         # Actually to do with a configured form isn't it...
     page_template = 'templates/UserPage.tmpl'
 
@@ -54,6 +66,11 @@ class RecordRender(object):
 
     def rendered_record_entry_form(self, item):
         dataentry = Template ( file = self.record_editget_template,
+                               searchList = [self.environ, item] )
+        return dataentry
+
+    def rendered_user_login_form(self, item):
+        dataentry = Template ( file = self.record_user_login_template,
                                searchList = [self.environ, item] )
         return dataentry
 
@@ -102,22 +119,29 @@ def page_render_html(json, **argd):
         # Show the database & a few options
         addresses = read_database()
         users                = R.rendered_record_list(addresses)
-        return R.render_page(content=users)
+        return R.render_page(content=users,extra={"user":"None"})
 
-    if action == "user_greet":
-        dummy_content = "<B> User Landing Page </B>. next state is  user_login "
-        return R.render_page(content=dummy_content)
+    #if action == "user_greet":
+    #    dummy_content = "<B> User Landing Page </B>. next state is  user_login "
+    #    return R.render_page(content=dummy_content)
 
     if action == "user_login":
-        dummy_content = "<B> User Login Page </B>. get login details next state is user_verify "
+        this_user = dummy_user(stem="form", **argd)
+        dummy_content = "<B> User Login Page </B>. get login details next state is user_verify "  # Real content is new template to get username and password
+        pre_filled_data_entry = R.rendered_user_login_form(this_user)
+        configured_form       = R.render_configured_form(pre_filled_data_entry,
+                                                       nextstep="user_verify",
+                                                       )
         
-        if user_exists():
-            pass
-        return R.render_page(content=dummy_content)
+        return R.render_page(content=dummy_content, dataentry=configured_form, extra={"user":"None"})
 
     if action == "user_verify":
+        if R.user_exists():
+            pass
+        else:
+            pass
         dummy_content = "<B>  User Verify  </B>. if valid update user record, state next state is user_view else user_challenge"
-        return R.render_page(content=dummy_content)
+        return R.render_page(content=dummy_content,extra={"user":"None"})
 
     if action == "user_view":
         dummy_content = "<B> User View </B>. whatever this user can view or edit determined by owns and can view relations"
@@ -140,8 +164,8 @@ def page_render_html(json, **argd):
         return R.render_page(content=dummy_content)
 
     if action == "user_logout":
-        dummy_content = "<B> Logout Page </B>.if logout update user record  next state is user greet"
-        return R.render_page(content=dummy_content)
+        dummy_content = "<B> Logout Page </B> if logout update user record  next state is user greet"
+        return R.render_page(content=dummy_content,extra={"user":"None"})
 
     if action == "user_lostpassword":
         dummy_content = "<B> User lost password  </B>. user enters email ddress if valid send login else bog off"
