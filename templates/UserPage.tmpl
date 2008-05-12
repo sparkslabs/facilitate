@@ -16,12 +16,13 @@
 
 ## User
 #def $usersappurl: /cgi-bin/app/users
-
 #def $userloginurl: $usersappurl?formtype=user_login
 #def $userlogouturl: $usersappurl?formtype=user_logout
+#def $userregisterurl: $usersappurl?formtype=user_register
 #def $userlogin: <a href="$userloginurl">Login</a>
 #def $userlogout: <a href="$userlogouturl">Logout</a>
 #def $usershomelink: <a href="$usersappurl">Home</a>
+#def $usersregister: <a href="$userregisterurl">Register</a>
 
 ## Added these lines:
 #def $msmissionsappurl: /cgi-bin/app/msmissions
@@ -151,7 +152,7 @@
 ## New second pretext for user login
 #def $userpretext:
 <table><tr>
-<td align="center" style="border: 3px solid; padding: 8;"> User<br>($usershomelink | $userlogin | $userlogout) </td>
+<td align="center" style="border: 3px solid; padding: 8;"> User<br>($usershomelink | $userlogin | $userlogout | $usersregister) </td>
 </tr></table>
 #end def
 
@@ -167,9 +168,11 @@
 #if $extra.user == "None"
 $userbanner
 $userpretext
-#else
-$user  user text here 
+#else if $extra.user == "Good"
+##$user  
 $pretext
+#else 
+forgot password form here
 #end if
 <ul>
 $content
@@ -179,8 +182,12 @@ $dataentry
 <hr>
 #if $extra.user == "None"
 Log in and enjoy participate!
+#else if $extra.user == "Good"
+Logged in enjoy participate!
 #else
-$extra
+Update forms for forgot password
+##else
+##Bad user
 #end if
 <hr>
 <!--
