@@ -155,7 +155,11 @@
 <td align="center" style="border: 3px solid; padding: 8;"> User<br>($usershomelink | $userlogin | $userlogout | $usersregister) </td>
 </tr></table>
 #end def
-
+#def $userpendingpretext:
+<table><tr>
+<td align="center" style="border: 3px solid; padding: 8;"> User<br>($usershomelink | $userlogin ) </td>
+</tr></table>
+#end def
 
 
 #def $content: <p>
@@ -171,7 +175,9 @@ $userpretext
 #else if $extra.user == "Good"
 ##$user  
 $pretext
-#else 
+#else if $extra.user == "Pending"
+$userpendingpretext
+#else
 forgot password form here
 #end if
 <ul>
@@ -184,6 +190,9 @@ $dataentry
 Log in and enjoy participate!
 #else if $extra.user == "Good"
 Logged in enjoy participate!
+#else if $extra.user == "Pending"
+<meta http-equiv="Set-Cookie" "content="State=Pending;" >
+
 #else
 Update forms for forgot password
 ##else

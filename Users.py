@@ -225,6 +225,8 @@ def page_render_html(json, **argd):
         return R.render_page(content=dummy_content, dataentry=configured_form, extra={"user":"None"})
 
     if action == "user_verify":
+        argh = argd.get("__environ__")
+        os.sys.stderr.write(repr(argh))
         username = argd.get("form.username")
         password = argd.get("form.password")
         user, valid_password = R.user_exists(username, password)
@@ -237,8 +239,8 @@ def page_render_html(json, **argd):
                     verified_user_content = "<B>  User Verify  </B>. valid user update user record state,<p> user view to become restricted <p>This is UserPage.tmpl at present no restrictions"
                     return R.render_page(content=verified_user_content,extra={"user":"Good"})
                 else:     
-                    verified_user_content="<B>  User Verify  </B>. valid user verification email sent ,<p> user view is restricted <p>This is  UserPage.tmpl at present no view at all"    
-                    return R.render_page(content=verified_user_content,extra={"user":"None"})
+                    verified_user_content="<B>  User Verify  </B>. valid user verification email sent waiting response,<p> user view is restricted <p>This is  UserPage.tmpl at present no view at all"    
+                    return R.render_page(content=verified_user_content,extra={"user":"Pending"})
             else:  # ***** tested  
                 user["loggedin"] = "yes"
                 store_user(user)
@@ -279,22 +281,24 @@ def page_render_html(json, **argd):
            if argd.get("form.password") != argd.get("form.duppassword") or not validate_email(argd.get("form.useremail")):
                # cf empty_data_entry = R.rendered_record_entry_form({})
                # cf configured_form  = R.render_configured_form(empty_data_entry)
-               empty_data_entry = R.rendered_record_userpending_form({})
+               empty_data_entry = R.rendered_record_userpending_form({"user":"pending"})
                configured_form       = R.render_configured_form(empty_data_entry,
                                                        nextstep="user_validate",
                                                        submitlabel="Register",
                                                        )
-               dummy_content = "<B> Validate New  </B>.  user_pending re-submit passwords" 
+               #dummy_content = "<B> Validate New  </B>.  user_pending re-submit passwords" 
                return R.render_page(content=configured_form  ,extra={"user":"None"})
            else:  # New user pending reciept of email 
                new_user = make_user_unique(fields=["username",],stem="form", **argd)
-               pre_filled_data_entry = R.rendered_record_userpending_form(new_user)                        
+               pre_filled_data_entry = R.rendered_record_userpending_form({"user":"pending"})                        
                configured_form       = R.render_configured_form(pre_filled_data_entry,
                                                        nextstep="user_verify",
                                                        submitlabel="Register",
                                                        )
                dummy_content = "<B> Validate New  </B>.  user_pending email sent" 
-               return R.render_page(content=configured_form  ,extra={"user":"New"}) # fix this
+               #return R.render_page(content=dummy_content, extra={"user":"Pending"})
+               #return R.render_page(content=configured_form  ,extra={"user":"Pending"}) # fix this
+               return R.render_page(content=pre_filled_data_entry ,extra={"user":"Pending"})
           
         else:      # No new user need valid user name
             dummy_content = "<B> Invalid Username </B>. please try again "           

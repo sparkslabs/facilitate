@@ -12,7 +12,9 @@
 #def $userstate: "$user"
 
 
-if
+#if $user == "pending"
+Pending User 
+#else
 <input type="hidden" name="$(form).userid" value="$userid" /> </td></tr>
 <table style="width:100%;">
 <tr><td width="15%"> User name</td><td> <input type="text" name="$(form).username" value="$user" size="30"/> </td></tr>
@@ -32,3 +34,4 @@ if
 ##</td></tr>
 ##<tr><td> Base User</td><td> <input type="checkbox" name="$(form).baseuser" $baseuser size="80"/> </td></tr>
 </table>
+#end if
