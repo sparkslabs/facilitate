@@ -4,7 +4,7 @@ from Cheetah.Template import Template
 from model.Record import EntitySet
 import os,time
 
-UsersDatabase = EntitySet("users",key="userid")
+UsersDatabase = EntitySet("users",key="userid")des
 
 def store_new_user(the_user): return UsersDatabase.new_record(the_user)
 def read_database(): return UsersDatabase.read_database()

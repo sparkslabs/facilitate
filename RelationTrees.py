@@ -333,6 +333,18 @@ def RenderedRelationEntryForm(realtionid, LeftRelationName, RightRelationName, l
     return empty_data_entry 
 
 
+
+def find_children(this_root,db,child_index,level_index,sub_tree):
+    children = []
+    for nodes in db:
+        if node["left_dbid"] == "relationtrees" and node["left_itemid"]==this_root["relationid"]:
+            children.append(node)
+            db.remove(node)
+    for child in children:
+        offspring = find_children(child,db,)
+        sub_tree.append(offspring)          
+        
+
 def page_render_html(json, **argd):
     action = argd.get("formtype","overview")
     R = RelationRender(argd["__environ__"])
@@ -511,6 +523,33 @@ def page_render_html(json, **argd):
         return R.render_page(content=rendered_relations, dataentry= rendered_tuple)
 
     if action == "view_tree":
+        relations = read_database()
+        root_relation = get_item(argd["relationid"])
+        
+        this_tree = []
+        for relation in relations:       ## inefficient 
+            if relation["root_id"] == root_relation["relationid"]:
+                this_tree.append(relation)
+       
+        tree_view = []
+        tree_view.append([root_relation,[]])
+        os.sys.stderr.write(repr(tree_view[0][0]["left_itemid"])) 
+        these_roots = [root_relation]
+        level = 0
+#        while this_tree != []:
+#            if these_roots != []:
+#                for this_root in these_roots:
+#                    for relation in this_tree:
+#                        if relation["left_dbid"] == "relationtrees" and relation["left_itemid"] == this_root["relationid"]:
+#                            os.sys.stderr.write(repr(relation)+"\n")
+#                            
+#                            this_tree.remove(relation)
+#                level+=1
+                 
+            
+
+                    
+             
         return str(Template ( file = 'templates/Page.tmpl', 
                          searchList = [
                              argd["__environ__"],
