@@ -247,13 +247,14 @@ def page_render_html(json, **argd):
                 verified_user_content = "<B>  User Verify  </B>.  valid user updated user record state,<p> user view to become restricted <p>This is  UserPage.tmpl at present no restrictions"
                 return R.render_page(content=verified_user_content,extra={"user":"Good"})
         elif user:  # ***** tested 
-             # if valid user name + bad password two tries then throw to resend password
+           # if cnt < 2  # if valid user name + bad password two tries then throw to resend password
              verified_user_content = "<B>  User Verify  </B>.  valid user name wrong password next state is forgot password render User.ForgotPW.tmpl"
              pre_filled_data_entry = R.rendered_record_userforgotpw_form(user)
              configured_form       = R.render_configured_form(pre_filled_data_entry,
                                                        nextstep="user_verify",
                                                        )
              return R.render_page(content=verified_user_content,extra={"user":"Bad"})
+           # else bad password
         else:       # ***** tested 
              overview_content = "<B> Bad User and Password    </B>.  display some real content here  "
              return R.render_page(content=overview_content,extra={"user":"None"})
@@ -290,7 +291,8 @@ def page_render_html(json, **argd):
                return R.render_page(content=configured_form  ,extra={"user":"None"})
            else:  # New user pending reciept of email 
                new_user = make_user_unique(fields=["username",],stem="form", **argd)
-               pre_filled_data_entry = R.rendered_record_userpending_form({"user":"pending"})                        
+    
+           pre_filled_data_entry = R.rendered_record_userpending_form({"user":"pending"})                        
                configured_form       = R.render_configured_form(pre_filled_data_entry,
                                                        nextstep="user_verify",
                                                        submitlabel="Register",
