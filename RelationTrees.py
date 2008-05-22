@@ -333,17 +333,16 @@ def RenderedRelationEntryForm(realtionid, LeftRelationName, RightRelationName, l
     return empty_data_entry 
 
 
-
-def find_children(this_root,db,child_index,level_index,sub_tree):
-    children = []
-    for nodes in db:
-        if node["left_dbid"] == "relationtrees" and node["left_itemid"]==this_root["relationid"]:
-            children.append(node)
-            db.remove(node)
-    for child in children:
-        offspring = find_children(child,db,)
-        sub_tree.append(offspring)          
-        
+def find_children(this_root,this_tree,current_tree):
+    for item in current_tree:
+        if item["left_dbid"] == "relationtrees" and item["left_itemid"]==this_root:
+            child_id = item["relationid"]
+            this_tree[this_root].append(child_id)
+            current_tree.remove(item)            
+    for id in this_tree[this_root]:
+        this_tree[id] = []
+        find_children(id,this_tree,current_tree)
+                
 
 def page_render_html(json, **argd):
     action = argd.get("formtype","overview")
@@ -525,17 +524,18 @@ def page_render_html(json, **argd):
     if action == "view_tree":
         relations = read_database()
         root_relation = get_item(argd["relationid"])
+        current_tree = []
+        for relation in relations:          #   only look at nodes in this tree
+            if relation["root_id"]==root_relation["relationid"]:
+                current_tree.append(relation) 
+        this_tree = {}
+        root_key = root_relation["relationid"]
+        this_tree[root_key]=[]
+        find_children(root_key,this_tree,current_tree)
+        os.sys.stderr.write(repr(this_tree)+"\n")
+#        tree.append(find_children(root_relation))
         
-        this_tree = []
-        for relation in relations:       ## inefficient 
-            if relation["root_id"] == root_relation["relationid"]:
-                this_tree.append(relation)
-       
-        tree_view = []
-        tree_view.append([root_relation,[]])
-        os.sys.stderr.write(repr(tree_view[0][0]["left_itemid"])) 
-        these_roots = [root_relation]
-        level = 0
+        
 #        while this_tree != []:
 #            if these_roots != []:
 #                for this_root in these_roots:
