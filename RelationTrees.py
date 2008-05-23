@@ -333,8 +333,8 @@ def RenderedRelationEntryForm(realtionid, LeftRelationName, RightRelationName, l
     return empty_data_entry 
 
 
-def find_children(this_root,this_tree,current_tree):
-    for item in current_tree:
+def find_children(this_root,this_tree,current_tree):         # tree as dictionary of lists c.f. http://www.python.org/doc/essays/graphs.html
+    for item in current_tree:                               
         if item["left_dbid"] == "relationtrees" and item["left_itemid"]==this_root:
             child_id = item["relationid"]
             this_tree[this_root].append(child_id)
@@ -342,6 +342,26 @@ def find_children(this_root,this_tree,current_tree):
     for id in this_tree[this_root]:
         this_tree[id] = []
         find_children(id,this_tree,current_tree)
+
+def render_subtree(keys,relation_list,this_tree):
+     for key in keys:
+         relation_list.append(get_item(key))
+         subtree_keys = this_tree[key]
+         for key in subtree_keys:
+             render_subtree(subtree_keys,relation_list,this_tree)
+     return relation_list
+     
+     
+def render_relation_tree(child_keys,relation_list,this_tree): 
+    for key in child_keys:
+            subtree_keys = this_tree[key]
+            relation_list.append(get_item(key))
+            render_subtree(subtree_keys,relation_list,this_tree)
+    return relation_list
+    
+        
+         
+    
                 
 
 def page_render_html(json, **argd):
@@ -351,7 +371,6 @@ def page_render_html(json, **argd):
     if action == "overview":
         relations = read_database()
         rendered_relations = R.rendered_record_list(relations)  # generalised Rendered Relation
-
         return R.render_page(content=rendered_relations) #str(R.environ)) #
 
 
@@ -533,9 +552,14 @@ def page_render_html(json, **argd):
         this_tree[root_key]=[]
         find_children(root_key,this_tree,current_tree)
         os.sys.stderr.write(repr(this_tree)+"\n")
-#        tree.append(find_children(root_relation))
-        
-        
+        render_tree = render_relation_tree(root_key,[],this_tree)
+        os.sys.stderr.write(repr(render_tree)+"\n")
+        rendered_tree = R.rendered_record_list(render_tree)
+        return R.render_page(content=rendered_tree)
+
+
+
+#        tree.append(find_children(root_relation))        
 #        while this_tree != []:
 #            if these_roots != []:
 #                for this_root in these_roots:
@@ -550,16 +574,7 @@ def page_render_html(json, **argd):
 
                     
              
-        return str(Template ( file = 'templates/Page.tmpl', 
-                         searchList = [
-                             argd["__environ__"],
-                              {
-                                "extra": "" ,
-                                "content" : "Sorry tree view not implemented here yet! (%s)" % str(action),
-                                "dataentry" : "",
-                                "banner" : "Not found", # XXXX should send back a 404 status
-                              }
-                          ] ))
+        
 
 
 
