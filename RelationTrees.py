@@ -343,20 +343,30 @@ def find_children(this_root,this_tree,current_tree):         # tree as dictionar
         this_tree[id] = []
         find_children(id,this_tree,current_tree)
 
-def render_subtree(keys,relation_list,this_tree):
+def render_subtree(level,child,keys,relation_list,this_tree):
+     level+=1
      for key in keys:
-         relation_list.append(get_item(key))
+         child+=1
          subtree_keys = this_tree[key]
+         strlevel = str(level)
+         strchild = str(child)
+         list = repr(subtree_keys)
+         relation_list.append({"level":strlevel,"child":strchild,"subtree":list,"root_id":-99,"relationid":"-1"})
+         relation_list.append(get_item(key))
+          #relation_list.append({"level":strlevel,"child":strchild,"subtree":list,"root_id":-99,"relationid":"-1"})
          for key in subtree_keys:
-             render_subtree(subtree_keys,relation_list,this_tree)
+             render_subtree(level,child,subtree_keys,relation_list,this_tree)
      return relation_list
      
      
-def render_relation_tree(child_keys,relation_list,this_tree): 
-    for key in child_keys:
-            subtree_keys = this_tree[key]
-            relation_list.append(get_item(key))
-            render_subtree(subtree_keys,relation_list,this_tree)
+def render_relation_tree(key,relation_list,this_tree):
+    subtree_keys = this_tree[key]
+    list = repr(subtree_keys)
+    relation_list.append({"level":"0","child":"0","subtree":list,"root_id":-99,"relationid":"-1"}) 
+    relation_list.append(get_item(key))
+    level = 0
+    child = 0
+    render_subtree(level,child,subtree_keys,relation_list,this_tree)
     return relation_list
     
         
@@ -551,9 +561,9 @@ def page_render_html(json, **argd):
         root_key = root_relation["relationid"]
         this_tree[root_key]=[]
         find_children(root_key,this_tree,current_tree)
-        os.sys.stderr.write(repr(this_tree)+"\n")
+        # os.sys.stderr.write(repr(this_tree)+"\n")
         render_tree = render_relation_tree(root_key,[],this_tree)
-        os.sys.stderr.write(repr(render_tree)+"\n")
+        # os.sys.stderr.write(repr(render_tree)+"\n")
         rendered_tree = R.rendered_record_list(render_tree)
         return R.render_page(content=rendered_tree)
 
