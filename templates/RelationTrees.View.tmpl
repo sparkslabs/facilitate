@@ -4,7 +4,7 @@
 #for $relation in $relations
 #if $relation["root_id"]==-99
 <p> 
-$relation["level"] $relation["child"] $relation["subtree"]
+  <tr> &nbsp &nbsp &nbsp &nbsp<td>tree level: $relation["level"] <td> child number: $relation["child"] <td> children: $relation["subtree"] </tr> 
 #else
 <li>$relation["relationid"] ( <a href='$appurl?formtype=view_relation&relationid=$relation["relationid"]'>v</a>,
 ## <a href='$appurl?formtype=edit_relation&relationid=$relation["relationid"]'>e</a>, 
