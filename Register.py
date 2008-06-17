@@ -2,22 +2,14 @@
 """
 This script handles user registrations
 """
-import pprint
+import md5                          # for hexdigest
+import random                       # for confirmation codes
+import time                         # to check age
+import pprint                       # for dumping errors
 
-from model.Record import EntitySet
+from model.Record import EntitySet  # For access to the temporary DB
 
-class UniquenessConstraint(Exception): pass
-class SamenessConstraint(Exception): pass
-class NotNull(Exception): pass
-
-
-Registrations = EntitySet("registrations", key="regid")
-
-import md5
-import random
-import time
-
-def generate_confrimation_code():
+def generate_confirmation_code():
     return md5.md5(str(random.randint(100000000000,1000000000000))).hexdigest()
 
 def reg_new(**argd):
@@ -31,12 +23,11 @@ def reg_new(**argd):
         'passwordtwo'      : argd.get("passwordtwo", ""),
         'screenname'       : argd.get("screenname", ""),
         'side'             : argd.get("side", ""),
-
-      # --------------------------------------------------------- Independently createable
-        'confirmed'        : False,
-        'confirmationcode' : generate_confrimation_code(),
-        'personrecord'     : "",
     }
+    # --------------------------------------------------------- Sprinkle with default metadata
+    rec["confirmed"] = False
+    rec["confirmationcode"] = generate_confirmation_code()
+    rec["personrecord"] = ""
 
     # -------------------------------------------- Validations...
 
@@ -47,15 +38,25 @@ def reg_new(**argd):
                          "Email looks wrong - doesn't contain a '@' symbol. (got: %s)" % rec["email"] )
 
     # Validate password
-    # passwords typed must equal passwordtwo and not be ""
+    # password typed must equal passwordtwo
     if (rec["password"] != rec["passwordtwo"]) or (rec["password"] == ""):
-        raise SamenessConstraint("password")
+        raise ValueError(rec, "password",
+                         "Passwords provided do not match"
+                        )
+    # password must not be null
+    if rec["password"] == "":
+        raise ValueError(rec, "password",
+                         "Passwords must not be blank!"
+                        )
 
     # Email address must not match any other record in the database
     R = Registrations.read_database()
+    uniquefield = "email"
     for r in R:
-       if r["email"] == rec["email"]:
-           raise UniquenessConstraint(r)
+       if r[uniquefield] == rec[uniquefield]:
+           raise ValueError(rec, uniquefield,
+                            "Users are are identified as unique by %s - record already exists (got %s)" % (uniquefield, rec[uniquefield])
+                           )
 
 
     # Validate month
@@ -97,18 +98,22 @@ def reg_new(**argd):
     min_age = 18
 
     if year_age < min_age: 
-        raise ValueError(rec, "dob.year"
+        raise ValueError(rec, "dob.year",
                          "Year age restriction not met. Must be minimum %d years. (Got: %d)" % (min_age, year_age)
                         )
 
     # Application logic validation
     if rec["side"] == "":
-        raise ValueError(rec, "side"
+        raise ValueError(rec, "side",
                          "'side' is empty - you must pick sides! (Got: %s)" % rec["side"]
                         )
 
-    if rec["side"] not in ["eve", "isambard"]:
-        raise ValueError("side")
+    OKValues = ["eve", "isambard"]
+    if rec["side"] not in OKValues:
+        raise ValueError(rec, "side",
+                         "'side' must be one of the valid values: %s. (Got: %s)" %
+                            (repr(OKValues), repr(rec["side"]))
+                        )
 
     # ---------------------------------------------------------  TRANSFORMS FOR STORAGE
     #    One way hash for security reasons before storage
@@ -136,29 +141,12 @@ def page_logic(json, **argd):
                      }
                    ]
 
-        except UniquenessConstraint, e:
-            R = e.args[0]
-            return [ 
-                     "new_fail_unique",  
-                     { "message" : "EXISTING USER",
-                       "record" : R,
-                     }
-                   ]
-
-        except SamenessConstraint, e:
-            R = e.args[0]
-            return [ 
-                     "new_fail_password",  
-                     { "message" : "OTHER ERROR",
-                       "record" : R,
-                     }
-                   ]
-
         except ValueError, (R, field, Reason):
             return [ 
                      "error",  
                      { "message" : Reason,
                        "record" : R,
+                       "problemfield" : field,
                      }
                    ]
 
@@ -212,21 +200,163 @@ def MakeHTML( structure ):
 def page_render_html(json, **argd):
     return MakeHTML( page_logic(json, **argd) )
 
+Registrations = EntitySet("registrations", key="regid")
 
 if __name__ == "__main__":
-    testcase = {
-              'action' : 'new',
-              'dob.day': '31',
-              'dob.month': 'June',
-              'dob.year': '1980',
-              'email': 'ms@cerenity.org',
-              'password': 'password',
-              'passwordtwo': 'password',
-              'screenname': 'Michael',
-              'side': 'eve',
-             }
-
-
-    pprint.pprint(
-        page_logic(None, **testcase)
-    )
+    if 0:
+        print "WARNING, running this test will zap your local store"
+        print "press return to continue, control-c to not continue"
+        raw_input()
+    Registrations.Zap("registrations","regid")
+    testcases = [
+             [ "new", 
+                "should succeed",
+               "Can create new record in new database",
+               {
+                  'action' : 'new',
+                  'dob.day': '30',
+                  'dob.month': 'June',
+                  'dob.year': '1980',
+                  'email': 'ms@cerenity.org',
+                  'password': 'password',
+                  'passwordtwo': 'password',
+                  'screenname': 'Michael',
+                  'side': 'eve',
+               }],
+             [ "error", 
+               "email",
+               "Can't recreate same record in existing database",
+               {
+                  'action' : 'new',
+                  'dob.day': '30',
+                  'dob.month': 'June',
+                  'dob.year': '1980',
+                  'email': 'ms@cerenity.org',
+                  'password': 'password',
+                  'passwordtwo': 'password',
+                  'screenname': 'Michael',
+                  'side': 'eve',
+               }],
+             [ "error", 
+               "dob.day",
+               "Can't create record with bogus day for month",
+               {
+                  'action' : 'new',
+                  'dob.day': '31',
+                  'dob.month': 'June',
+                  'dob.year': '1980',
+                  'email': 'ma@cerenity.org',
+                  'password': 'password',
+                  'passwordtwo': 'password',
+                  'screenname': 'Michael',
+                  'side': 'eve',
+               }],
+             [ "error", 
+               "dob.month",
+               "Can't create record with bogus month",
+               {
+                  'action' : 'new',
+                  'dob.day': '30',
+                  'dob.month': 'June...',
+                  'dob.year': '1980',
+                  'email': 'ma@cerenity.org',
+                  'password': 'password',
+                  'passwordtwo': 'password',
+                  'screenname': 'Michael',
+                  'side': 'eve',
+               }],
+             [ "error", 
+               "dob.year",
+               "Can't create user who is younger than 18",
+               {
+                  'action' : 'new',
+                  'dob.day': '30',
+                  'dob.month': 'June',
+                  'dob.year': '2000',
+                  'email': 'ma@cerenity.org',
+                  'password': 'password',
+                  'passwordtwo': 'password',
+                  'screenname': 'Michael',
+                  'side': 'eve',
+               }],
+             [ "error", 
+               "email",
+               "user's emails must contain an @ as a sanity check on the email",
+               {
+                  'action' : 'new',
+                  'dob.day': '30',
+                  'dob.month': 'June',
+                  'dob.year': '2000',
+                  'email': 'ms at cerenity.org',
+                  'password': 'password',
+                  'passwordtwo': 'password',
+                  'screenname': 'Michael',
+                  'side': 'eve',
+               }],
+             [ "error", 
+               "password",
+               "Passwords provided by the user must match",
+               {
+                  'action' : 'new',
+                  'dob.day': '30',
+                  'dob.month': 'June',
+                  'dob.year': '1980',
+                  'email': 'ma@cerenity.org',
+                  'password': 'password',
+                  'passwordtwo': 'passwordtwo',
+                  'screenname': 'Michael',
+                  'side': 'eve',
+               }],
+             [ "error", 
+               "password",
+               "Password must not be null",
+               {
+                  'action' : 'new',
+                  'dob.day': '30',
+                  'dob.month': 'June',
+                  'dob.year': '1980',
+                  'email': 'ma@cerenity.org',
+                  'password': '',
+                  'passwordtwo': '',
+                  'screenname': 'Michael',
+                  'side': 'eve',
+               }],
+             [ "error", 
+               "side",
+               "User must pick a side",
+               {
+                  'action' : 'new',
+                  'dob.day': '30',
+                  'dob.month': 'June',
+                  'dob.year': '1980',
+                  'email': 'ma@cerenity.org',
+                  'password': 'password',
+                  'passwordtwo': 'password',
+                  'screenname': 'Michael',
+                  'side': '',
+               }],
+             [ "error", 
+               "side",
+               "User must pick a side which is one of the permitted values",
+               {
+                  'action' : 'new',
+                  'dob.day': '30',
+                  'dob.month': 'June',
+                  'dob.year': '1980',
+                  'email': 'ma@cerenity.org',
+                  'password': 'password',
+                  'passwordtwo': 'password',
+                  'screenname': 'Michael',
+                  'side': 'not eve or isambard',
+               }],
+    ]
+    print "RUNNING TEST SUITE"
+    print "------------------"
+    for testcase in testcases:
+        testdata = testcase[-1]
+        result = page_logic(None, **testdata)
+        print testcase[2],
+        assert result[0] == testcase[0], ( "testcase return code mismatch %s != %s" % (repr(result[0]), repr(testcase[0])) )
+        if result[0] == "error":
+            assert testcase[1] == result[1]["problemfield"], "Testcase return field mismatch %s %s" % (repr(result[1]["problemfield"]), repr(testcase[1]))
+        print "PASSED"        
