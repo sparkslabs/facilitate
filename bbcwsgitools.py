@@ -31,6 +31,12 @@ class Functional(object):
             else:
                 page = self.callback({}, **args)
             status,headers = "200 OK", [('Content-type',self.responsetype)]
+        else:
+            if node:
+                status,headers,page = self.callback(node,**args)
+            else:
+                status,headers,page = self.callback({}, **args)
+
 
         return status,headers,page
 
@@ -85,6 +91,26 @@ class JSON_Interceptor(object):
                 sys.stderr.write("JSON: %s\n" % json)
                 environ["bbc.args"]["__json__"] = cjson.decode(json)
 
+        R = self.application(environ, start_response)
+        for line in R:
+            yield line
+
+from Cookie import SimpleCookie
+
+class CookieExtracter(object):
+    def __init__(self, application):
+        self.application = application
+
+    def __call__(self, environ, start_response):
+        cookies_in = SimpleCookie()
+        cookies_in.load(environ["HTTP_COOKIE"])
+        cookies = {}
+        for C in cookies_in:
+            cookies[C] = cookies_in[C].value
+#            pass
+#            cookies[C.key] = C.value
+        environ["bbc.cookies"] = cookies
+#        environ["bbc.cookies"] = dict(cookies_in)
         R = self.application(environ, start_response)
         for line in R:
             yield line
