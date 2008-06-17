@@ -12,34 +12,28 @@ from model.Record import EntitySet  # For access to the temporary DB
 def generate_confirmation_code():
     return md5.md5(str(random.randint(100000000000,1000000000000))).hexdigest()
 
-def reg_new(**argd):
-    rec = {
-      # --------------------------------------------------------- Required to create a new record
-        'dob.day'          : argd.get("dob.day", ""),
-        'dob.month'        : argd.get("dob.month", ""),
-        'dob.year'         : argd.get("dob.year", ""),
-        'email'            : argd.get("email", ""),
-        'password'         : argd.get("password", ""),
-        'passwordtwo'      : argd.get("passwordtwo", ""),
-        'screenname'       : argd.get("screenname", ""),
-        'side'             : argd.get("side", ""),
-    }
-    # --------------------------------------------------------- Sprinkle with default metadata
-    rec["confirmed"] = False
-    rec["confirmationcode"] = generate_confirmation_code()
-    rec["personrecord"] = ""
 
-    # -------------------------------------------- Validations...
+def validate_record(rec):
+    # Minimally validate email. (must not be null & check for "@")
+    # email must not be null
+    if rec["email"] == "":
+        raise ValueError(rec, "email",
+                         "%s must not be blank! (got: %s)" % ("email",repr(rec["email"]))
+                        )
 
-    # Minimally validate email. (check for "@")
     # passwords typed must equal passwordtwo and not be ""
     if "@" not in rec["email"]:
         raise ValueError(rec, "email",
-                         "Email looks wrong - doesn't contain a '@' symbol. (got: %s)" % rec["email"] )
+                         "Email looks wrong - doesn't contain a '@' symbol. (got: %s)" % repr(rec["email"]) )
 
+    # Screenname must not be null
+    if rec["screenname"] == "":
+        raise ValueError(rec, "screenname",
+                         "%s must not be blank! (got: %s)" % ("screenname",repr(rec["screenname"]))
+                        )
     # Validate password
     # password typed must equal passwordtwo
-    if (rec["password"] != rec["passwordtwo"]) or (rec["password"] == ""):
+    if rec["password"] != rec["passwordtwo"]:
         raise ValueError(rec, "password",
                          "Passwords provided do not match"
                         )
@@ -55,9 +49,8 @@ def reg_new(**argd):
     for r in R:
        if r[uniquefield] == rec[uniquefield]:
            raise ValueError(rec, uniquefield,
-                            "Users are are identified as unique by %s - record already exists (got %s)" % (uniquefield, rec[uniquefield])
+                            "Users are are identified as unique by %s - record already exists (got %s)" % (repr(uniquefield), repr(rec[uniquefield]))
                            )
-
 
     # Validate month
     if rec["dob.month"] not in [ "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" ]:
@@ -65,6 +58,19 @@ def reg_new(**argd):
                          "dob.month",
                          "Month doesn't match options - should be full word, capitalised (got: %s)" % repr(rec["dob.month"])
                         ) 
+
+    # year must not be null
+    if rec["dob.year"] == "":
+        raise ValueError(rec, "dob.year",
+                         "%s must not be blank! (got: %s)" % ("dob.year",repr(rec["dob.year"]))
+                        )
+
+    try:
+       year = int(rec["dob.year"])
+    except ValueError:
+        raise ValueError(rec, "dob.year",
+                         "%s must parse as an integer! (got: %s)" % ("dob.year",repr(rec["dob.year"]))
+                        )
 
     # Validate day is within range for given month
     m2d = {
@@ -86,12 +92,26 @@ def reg_new(**argd):
         if days == 28:
             days +=1
      
+    # day must not be null
+    if rec["dob.day"] == "":
+        raise ValueError(rec, "dob.day",
+                         "%s must not be blank! (got %s)" % ("dob.day", repr(rec["dob.day"]) )
+                        )
+
+    try:
+       day = int(rec["dob.day"])
+    except ValueError:
+        raise ValueError(rec, "dob.day",
+                         "%s must parse as an integer! (got: %s)" % ("dob.day",repr(rec["dob.day"]) )
+                        )
+
     if (int(rec["dob.day"]) < 1) or int(rec["dob.day"]) > days:
         raise ValueError(rec,
                          "dob.day",
                          "Day in month falling on a day not in that month? (got: %s %s)" % (repr(rec["dob.day"]), repr(rec["dob.month"]))
                         )
 
+                    
     # "yearage" >= 18
     # FIXME: This is actually excludes many 18 year olds...
     year_age = (time.localtime(time.time())[0] - int(rec["dob.year"]))
@@ -99,13 +119,13 @@ def reg_new(**argd):
 
     if year_age < min_age: 
         raise ValueError(rec, "dob.year",
-                         "Year age restriction not met. Must be minimum %d years. (Got: %d)" % (min_age, year_age)
+                         "Year age restriction not met. Must be minimum %d years. (Got: %d, %s)" % (min_age, year_age, repr(rec["dob.year"]))
                         )
 
     # Application logic validation
     if rec["side"] == "":
         raise ValueError(rec, "side",
-                         "'side' is empty - you must pick sides! (Got: %s)" % rec["side"]
+                         "'side' is empty - you must pick sides! (Got: %s)" % repr(rec["side"])
                         )
 
     OKValues = ["eve", "isambard"]
@@ -115,6 +135,29 @@ def reg_new(**argd):
                             (repr(OKValues), repr(rec["side"]))
                         )
 
+
+
+def reg_new(**argd):
+    rec = {
+      # --------------------------------------------------------- Required to create a new record
+        'dob.day'          : argd.get("dob.day", ""),
+        'dob.month'        : argd.get("dob.month", ""),
+        'dob.year'         : argd.get("dob.year", ""),
+        'email'            : argd.get("email", ""),
+        'password'         : argd.get("password", ""),
+        'passwordtwo'      : argd.get("passwordtwo", ""),
+        'screenname'       : argd.get("screenname", ""),
+        'side'             : argd.get("side", ""),
+    }
+    # --------------------------------------------------------- Sprinkle with default metadata
+    rec["confirmed"] = False
+    rec["confirmationcode"] = generate_confirmation_code()
+    rec["personrecord"] = ""
+
+    # -------------------------------------------- Validations... (lots of these)
+
+    validate_record(rec) # Seperated out to a seperate function to make logic clearer
+
     # ---------------------------------------------------------  TRANSFORMS FOR STORAGE
     #    One way hash for security reasons before storage
     #    NOTE: This means we always check the digest, not the value
@@ -122,6 +165,7 @@ def reg_new(**argd):
     #
     if rec["password"] != "":
         rec["password"] = md5.md5(rec["password"]).hexdigest()
+
     if rec["passwordtwo"] != "":
         rec["passwordtwo"] = md5.md5(rec["passwordtwo"]).hexdigest()
 
@@ -141,7 +185,11 @@ def page_logic(json, **argd):
                      }
                    ]
 
-        except ValueError, (R, field, Reason):
+        except ValueError, e:
+            try:
+                (R, field, Reason) = e.args
+            except ValueError:
+                raise e
             return [ 
                      "error",  
                      { "message" : Reason,
@@ -349,14 +397,156 @@ if __name__ == "__main__":
                   'screenname': 'Michael',
                   'side': 'not eve or isambard',
                }],
+             [ "__default__", 
+                "",
+               "If called with a null action, just respond with default behaviour - echo input",
+               {
+                  'action' : '',
+                  'dob.day': '30',
+                  'dob.month': 'June',
+                  'dob.year': '1980',
+                  'email': 'ms@cerenity.org',
+                  'password': 'password',
+                  'passwordtwo': 'password',
+                  'screenname': 'Michael',
+                  'side': 'eve',
+               }],
+             [ "error", 
+               "dob.day",
+               "Day must not be null",
+               {
+                  'action' : 'new',
+                  'dob.day': '',
+                  'dob.month': 'June',
+                  'dob.year': '1980',
+                  'email': 'ma@cerenity.org',
+                  'password': 'password',
+                  'passwordtwo': 'password',
+                  'screenname': 'Michael',
+                  'side': 'eve',
+               }],
+             [ "error", 
+               "dob.month",
+               "month must not be null",
+               {
+                  'action' : 'new',
+                  'dob.day': '30',
+                  'dob.month': '',
+                  'dob.year': '1980',
+                  'email': 'ma@cerenity.org',
+                  'password': 'password',
+                  'passwordtwo': 'password',
+                  'screenname': 'Michael',
+                  'side': 'eve',
+               }],
+             [ "error", 
+               "dob.year",
+               "year must not be null",
+               {
+                  'action' : 'new',
+                  'dob.day': '30',
+                  'dob.month': 'June',
+                  'dob.year': '',
+                  'email': 'ma@cerenity.org',
+                  'password': 'password',
+                  'passwordtwo': 'password',
+                  'screenname': 'Michael',
+                  'side': 'eve',
+               }],
+             [ "error", 
+               "dob.year",
+               "year must not be a random string",
+               {
+                  'action' : 'new',
+                  'dob.day': '30',
+                  'dob.month': 'June',
+                  'dob.year': 'hello',
+                  'email': 'ma@cerenity.org',
+                  'password': 'password',
+                  'passwordtwo': 'password',
+                  'screenname': 'Michael',
+                  'side': 'eve',
+               }],
+             [ "error", 
+               "dob.year",
+               "year must be a string representing an integer, not a float",
+               {
+                  'action' : 'new',
+                  'dob.day': '30',
+                  'dob.month': 'June',
+                  'dob.year': '2007.7',
+                  'email': 'ma@cerenity.org',
+                  'password': 'password',
+                  'passwordtwo': 'password',
+                  'screenname': 'Michael',
+                  'side': 'eve',
+               }],
+             [ "error", 
+               "dob.day",
+               "day must not be a random string",
+               {
+                  'action' : 'new',
+                  'dob.day': '30.3',
+                  'dob.month': 'June',
+                  'dob.year': '2007',
+                  'email': 'ma@cerenity.org',
+                  'password': 'password',
+                  'passwordtwo': 'password',
+                  'screenname': 'Michael',
+                  'side': 'eve',
+               }],
+             [ "error", 
+               "dob.day",
+               "day must be a string representing an integer, not a float",
+               {
+                  'action' : 'new',
+                  'dob.day': '30.3',
+                  'dob.month': 'June',
+                  'dob.year': '2007',
+                  'email': 'ma@cerenity.org',
+                  'password': 'password',
+                  'passwordtwo': 'password',
+                  'screenname': 'Michael',
+                  'side': 'eve',
+               }],
+             [ "error", 
+               "email",
+               "email must not be null!",
+               {
+                  'action' : 'new',
+                  'dob.day': '30',
+                  'dob.month': 'June',
+                  'dob.year': '1980',
+                  'email': '',
+                  'password': 'password',
+                  'passwordtwo': 'password',
+                  'screenname': 'Michael',
+                  'side': 'eve',
+               }],
+             [ "error", 
+               "screenname",
+               "screenname must not be null!",
+               {
+                  'action' : 'new',
+                  'dob.day': '30',
+                  'dob.month': 'June',
+                  'dob.year': '1980',
+                  'email': 'ma@cerenity.org',
+                  'password': 'password',
+                  'passwordtwo': 'password',
+                  'screenname': '',
+                  'side': 'eve',
+               }],
     ]
     print "RUNNING TEST SUITE"
     print "------------------"
     for testcase in testcases:
         testdata = testcase[-1]
         result = page_logic(None, **testdata)
-        print testcase[2],
+        print testcase[2],"|",
         assert result[0] == testcase[0], ( "testcase return code mismatch %s != %s" % (repr(result[0]), repr(testcase[0])) )
         if result[0] == "error":
             assert testcase[1] == result[1]["problemfield"], "Testcase return field mismatch %s %s" % (repr(result[1]["problemfield"]), repr(testcase[1]))
+            print result[1]["message"],"|",
         print "PASSED"        
+
