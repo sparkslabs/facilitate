@@ -12,7 +12,6 @@ from model.Record import EntitySet  # For access to the temporary DB
 def generate_confirmation_code():
     return md5.md5(str(random.randint(100000000000,1000000000000))).hexdigest()
 
-
 def validate_record(rec):
     # Minimally validate email. (must not be null & check for "@")
     # email must not be null
@@ -135,8 +134,6 @@ def validate_record(rec):
                             (repr(OKValues), repr(rec["side"]))
                         )
 
-
-
 def reg_new(**argd):
     rec = {
       # --------------------------------------------------------- Required to create a new record
@@ -180,7 +177,7 @@ def page_logic(json, **argd):
             R = reg_new(**argd) # This internally validates the record before creating it. This thefore means a possible crash at this point
             return [ 
                      "new",  
-                     { "message" : "NEW USER",
+                     { "message" : "Thank you for signing up. Just need to confirm your registration now!",
                        "record" : R,
                      }
                    ]
@@ -198,6 +195,53 @@ def page_logic(json, **argd):
                      }
                    ]
 
+    if argd.get("action", "") == "confirmcode":
+        if argd.get("regid",None) == None:
+             return [ "error",
+                      { "Message" : "Sorry, I can't confirm your registration without a registration id",
+                        "record" : {},
+                        "problemfield" : "regid",
+                      }
+                    ]
+        if argd.get("confirmationcode",None) == None:
+             return [ "error",
+                      { "Message" : "Sorry, I can't confirm your registration without a confirmation code",
+                        "record" : {},
+                        "problemfield" : "confirmationcode",
+                      }
+                    ]
+            
+        registration = Registrations.get_record(argd.get("regid",""))
+        if registration["confirmationcode"] == argd.get("confirmationcode",""):
+             registration["confirmed"] = True
+             Registrations.store_record(registration)
+             return [ "confirmed",
+                      { "message" : "Thank you for confirming your registration. Your account is now active.",
+                        "record" : registration }
+                    ]
+        else:
+             return [ "error",
+                      { "Message" : "There's an error with the confirmation code you're using",
+                      }
+                    ]
+             
+        return registration
+        """
+        person = get_person(argd["personid"])
+def get_person(person): return PeopleDatabase.get_record(person)
+        
+
+
+"""
+
+#        try:
+#            R = reg_new(**argd) # This internally validates the record before creating it. This thefore means a possible crash at this point
+#            return [ 
+#                     "new",  
+#                     { "message" : "NEW USER",
+#                       "record" : R,
+#                     }
+#                   ]
     return [ 
              "__default__",  
              { "message" : "Hello World"+pprint.pformat(argd),
@@ -223,25 +267,68 @@ error = """<html>
 </body>
 </html>"""
 
+notdirect = """<html>
+<body>
+<P><B>This script is not supposed to be called directly, please go back and try again.</b>
+</body>
+</html>"""
+
+registration_success = """<html>
+<body>
+<P><B> Thank you!</b>
+<P> You are <b>nearly</b> registered!
+<P> You will receive an email shortly with a link and confirmation code in. You will need
+    to click on the link to confirm your identity.
+<P> Alternatively you may enter your confirmation code here:
+<ul>
+<form method="get" action="http://127.0.0.1/cgi-bin/Y/trunk/register">
+    <P><input type="text" name="action"       value="confirmcode">
+    <P><input type="text" name="regid"       value="%(regid)s">
+    <P><input type="text" name="confirmationcode" value="%(confirmationcode)s">
+    <input type="submit" value="submit confirm code">
+</form>
+</ul>
+<P>You entered the following information:
+<ul>
+<li> email: %(email)s (this is what you will use to login)
+<li> Screen Name: %(screenname)s
+<li> Date of Birth: %(dob.day)s %(dob.month)s %(dob.year)s
+<li> Side chosen: %(side)s
+</ul>
+<p> We're obviously not displaying your password!
+</body>
+</html>
+"""
+
 def MakeHTML( structure ):
     structure[1]["record"]["password"] = "****"
     structure[1]["record"]["passwordtwo"] = "****"
     if structure[0] == "__default__":
-        return failback % structure[1]
+        return notdirect
 
     if structure[0] == "new":
-        return failback % structure[1]
+        try:
+            page = failback % structure[1]
+        except KeyError:
+            page = registration_success % {
+                       "body" : pprint.pformat(structure),
+                       "confirmationcode" : structure[1]["record"]["confirmationcode"],
+                       "regid"       : structure[1]["record"]["regid"],
+                       "email"       : structure[1]["record"]["email"],
+                       "screenname"  : structure[1]["record"]["screenname"],
+                       "dob.day"     : structure[1]["record"]["dob.day"],
+                       "dob.month"   : structure[1]["record"]["dob.month"],
+                       "dob.year"    : structure[1]["record"]["dob.year"],
+                       "side"        : structure[1]["record"]["side"],
+                   }
+#            page = failback % {"body" : pprint.pformat(structure[1]["record"]) }
+        return page
 
-    if structure[0] == "new_fail_unique":
-        return failback % structure[1]
-    
-    if structure[0] == "new_fail_password":
-        return failback % structure[1]
-    
     if structure[0] == "error":
         structure[1]["record"] = pprint.pformat( structure[1]["record"] )
-        return error % structure[1]
-    
+        page = error % structure[1]
+        return page
+
     return failback % { "body" : repr(structure) }
     
 
@@ -538,15 +625,48 @@ if __name__ == "__main__":
                   'side': 'eve',
                }],
     ]
-    print "RUNNING TEST SUITE"
-    print "------------------"
-    for testcase in testcases:
-        testdata = testcase[-1]
-        result = page_logic(None, **testdata)
-        print testcase[2],"|",
-        assert result[0] == testcase[0], ( "testcase return code mismatch %s != %s" % (repr(result[0]), repr(testcase[0])) )
-        if result[0] == "error":
-            assert testcase[1] == result[1]["problemfield"], "Testcase return field mismatch %s %s" % (repr(result[1]["problemfield"]), repr(testcase[1]))
-            print result[1]["message"],"|",
-        print "PASSED"        
+    if 0:
+            print "RUNNING TEST SUITE"
+            print "------------------"
+            for testcase in testcases:
+                testdata = testcase[-1]
+                result = page_logic(None, **testdata)
+                print testcase[2],"|",
+                assert result[0] == testcase[0], ( "testcase return code mismatch %s != %s" % (repr(result[0]), repr(testcase[0])) )
+                if result[0] == "error":
+                    assert testcase[1] == result[1]["problemfield"], "Testcase return field mismatch %s %s" % (repr(result[1]["problemfield"]), repr(testcase[1]))
+                    print result[1]["message"],"|",
+                print "PASSED"
+
+            print "CONFIRMCODE TEST"
+            print "----------------"
+
+    Registrations.Zap("registrations","regid")
+    userinfo = {
+                  'action' : 'new',
+                  'dob.day': '30',
+                  'dob.month': 'June',
+                  'dob.year': '1980',
+                  'email': 'ms@cerenity.org',
+                  'password': 'password',
+                  'passwordtwo': 'password',
+                  'screenname': 'Michael',
+                  'side': 'eve',
+               }
+    result = page_logic(None, **userinfo)
+    assert result[0] == "new", "New user created"
+#    pprint.pprint(result)
+#    print MakeHTML(result)
+    confirmbundle = {
+            "action" :"confirmcode",
+            "regid" : result[1]["record"]["regid"],
+            "confirmationcode": result[1]["record"]["confirmationcode"],
+    }
+    print "sending..."
+    pprint.pprint( confirmbundle )
+    result = page_logic(None, **confirmbundle)
+    print
+    print "got back..."
+    pprint.pprint(result)
+    print
 
