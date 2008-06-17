@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from bbcwsgitools import EnvironDumper, JSON_Interceptor, CGI_Parser, Functional
+from bbcwsgitools import EnvironDumper, JSON_Interceptor, CGI_Parser, Functional, CookieExtracter
 from Register import page_render_html
 
 
@@ -9,10 +9,12 @@ if __name__ == "__main__":
     from wsgiref.handlers import CGIHandler
 
     CGIHandler().run(
-        CGI_Parser( 
+        CGI_Parser(
+          CookieExtracter(
             JSON_Interceptor( 
-                Functional(page_render_html, style="simple",responsetype="text/html") 
+                Functional(page_render_html, style="fuller",responsetype="text/html") 
             ) 
+          )
         ) 
     )
 
