@@ -7,6 +7,8 @@ import random                       # for confirmation codes
 import time                         # to check age
 import pprint                       # for dumping errors
 
+import CookieJar
+import Cookie
 from model.Record import EntitySet  # For access to the temporary DB
 
 def generate_confirmation_code():
@@ -194,6 +196,23 @@ def page_logic(json, **argd):
                        "problemfield" : field,
                      }
                    ]
+        # end of action=new ------------------------------------------------------------------------
+
+    if argd.get("action", "") == "dump":
+        env = argd.get("__environ__")
+        cookie = env["bbc.cookies"].get("sessioncookie",None)
+        if cookie:
+            userid = CookieJar.getUser(cookie)
+            R = Registrations.get_record(userid)
+        else:
+            R = {"not": "found" }
+            
+        return [ "error",
+                 { "message": "nearly implemented!" + pprint.pformat(R),
+                   "record" : {},
+                   "problemfield" : ""
+                 }
+               ]
 
     if argd.get("action", "") == "confirmcode":
         if argd.get("regid",None) == None:
@@ -203,6 +222,7 @@ def page_logic(json, **argd):
                         "problemfield" : "regid",
                       }
                     ]
+
         if argd.get("confirmationcode",None) == None:
              return [ "error",
                       { "Message" : "Sorry, I can't confirm your registration without a confirmation code",
@@ -215,8 +235,11 @@ def page_logic(json, **argd):
         if registration["confirmationcode"] == argd.get("confirmationcode",""):
              registration["confirmed"] = True
              Registrations.store_record(registration)
+             cookie = CookieJar.getCookie(argd["regid"])
+             
              return [ "confirmed",
                       { "message" : "Thank you for confirming your registration. Your account is now active.",
+                        "sessioncookie" : cookie,
                         "record" : registration }
                     ]
         else:
@@ -226,22 +249,8 @@ def page_logic(json, **argd):
                     ]
              
         return registration
-        """
-        person = get_person(argd["personid"])
-def get_person(person): return PeopleDatabase.get_record(person)
-        
+        # end of action=confirmcode ------------------------------------------------------------------------
 
-
-"""
-
-#        try:
-#            R = reg_new(**argd) # This internally validates the record before creating it. This thefore means a possible crash at this point
-#            return [ 
-#                     "new",  
-#                     { "message" : "NEW USER",
-#                       "record" : R,
-#                     }
-#                   ]
     return [ 
              "__default__",  
              { "message" : "Hello World"+pprint.pformat(argd),
@@ -303,8 +312,9 @@ registration_success = """<html>
 def MakeHTML( structure ):
     structure[1]["record"]["password"] = "****"
     structure[1]["record"]["passwordtwo"] = "****"
+
     if structure[0] == "__default__":
-        return notdirect
+        return [], notdirect
 
     if structure[0] == "new":
         try:
@@ -321,19 +331,35 @@ def MakeHTML( structure ):
                        "dob.year"    : structure[1]["record"]["dob.year"],
                        "side"        : structure[1]["record"]["side"],
                    }
-#            page = failback % {"body" : pprint.pformat(structure[1]["record"]) }
-        return page
+        return [], page
+
+    if structure[0] == "confirmed":
+
+        sessioncookie = structure[1]["sessioncookie"]
+        expirytime = time.gmtime(time.time()+31000000) # approx 1 year
+        formatteddate = time.strftime("%a, %d-%b-%Y %H:%M:%S %Z", expirytime)
+
+        headers = [("Set-Cookie", "sessioncookie=%s; path=/; expires=%s"  % ( sessioncookie, formatteddate))]
+
+        return headers, """<html>
+        <body>
+        Floible!
+        </body>
+        </html>"""
 
     if structure[0] == "error":
         structure[1]["record"] = pprint.pformat( structure[1]["record"] )
         page = error % structure[1]
-        return page
+        return [], page
 
-    return failback % { "body" : repr(structure) }
+    return [], failback % { "body" : pprint.pformat(structure) }
     
 
 def page_render_html(json, **argd):
-    return MakeHTML( page_logic(json, **argd) )
+    extra_headers, page = MakeHTML( page_logic(json, **argd) )
+    status = "200 OK"
+    headers = [('Content-type', "text/html")]
+    return status, headers+extra_headers, page
 
 Registrations = EntitySet("registrations", key="regid")
 
@@ -669,4 +695,11 @@ if __name__ == "__main__":
     print "got back..."
     pprint.pprint(result)
     print
-
+    print "Redoing it..."
+    result = page_logic(None, **confirmbundle)
+    assert result[0] == "confirmed", "Confirmation from the system of success"
+    assert result[1]["record"]["confirmed"] , "Record updated to show success"
+    assert result[1]["sessioncookie"], "Cookie set"
+    print
+    print "got back..."
+    pprint.pprint(result)
