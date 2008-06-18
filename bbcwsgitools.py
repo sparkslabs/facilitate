@@ -141,6 +141,13 @@ class CGI_Parser(object):
         X = cgi.FieldStorage(fp=environ['wsgi.input'], environ=environ, keep_blank_values=1)
         env = {}
         for f in X:
+            try:
+               X_filename = X[f].filename
+            except AttributeError:
+               sys.stderr.write("Hmmm (%s)\n" %  f )
+               env[f] = X.getvalue(f)
+               continue
+
             if X[f].filename is None:
                 sys.stderr.write("Hmmm (%s)\n" %  f )
                 env[f] = X.getvalue(f)
