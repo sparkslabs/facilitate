@@ -10,6 +10,7 @@ import pprint                       # for dumping errors
 import CookieJar
 import Cookie
 from model.Record import EntitySet  # For access to the temporary DB
+import Interstitials
 
 def generate_confirmation_code():
     return md5.md5(str(random.randint(100000000000,1000000000000))).hexdigest()
@@ -276,7 +277,6 @@ def page_logic(json, **argd):
                       }
                     ]
              
-        return registration
         # end of action=confirmcode ------------------------------------------------------------------------
 
     return [ 
@@ -286,56 +286,6 @@ def page_logic(json, **argd):
              }
            ]
 
-failback = """<html>
-<body>
-<pre>
-%(body)s
-</pre>
-</body>
-</html>"""
-
-error = """<html>
-<body>
-<P><B>ERROR: %(message)s
-<P> Record
-<pre>
-%(record)s
-</pre>
-</body>
-</html>"""
-
-notdirect = """<html>
-<body>
-<P><B>This script is not supposed to be called directly, please go back and try again.</b>
-</body>
-</html>"""
-
-registration_success = """<html>
-<body>
-<P><B> Thank you!</b>
-<P> You are <b>nearly</b> registered!
-<P> You will receive an email shortly with a link and confirmation code in. You will need
-    to click on the link to confirm your identity.
-<P> Alternatively you may enter your confirmation code here:
-<ul>
-<form method="get" action="http://127.0.0.1/cgi-bin/Y/trunk/register">
-    <P><input type="text" name="action"       value="confirmcode">
-    <P><input type="text" name="regid"       value="%(regid)s">
-    <P><input type="text" name="confirmationcode" value="%(confirmationcode)s">
-    <input type="submit" value="submit confirm code">
-</form>
-</ul>
-<P>You entered the following information:
-<ul>
-<li> email: %(email)s (this is what you will use to login)
-<li> Screen Name: %(screenname)s
-<li> Date of Birth: %(dob.day)s %(dob.month)s %(dob.year)s
-<li> Side chosen: %(side)s
-</ul>
-<p> We're obviously not displaying your password!
-</body>
-</html>
-"""
 
 def MakeHTML( structure ):
     structure[1]["record"]["password"] = "****"
@@ -345,10 +295,7 @@ def MakeHTML( structure ):
         return [], notdirect
 
     if structure[0] == "new":
-        try:
-            page = failback % structure[1]
-        except KeyError:
-            page = registration_success % {
+        page = Interstitials.registration_success % {
                        "body" : pprint.pformat(structure),
                        "confirmationcode" : structure[1]["record"]["confirmationcode"],
                        "regid"       : structure[1]["record"]["regid"],
@@ -369,25 +316,20 @@ def MakeHTML( structure ):
 
         headers = [("Set-Cookie", "sessioncookie=%s; path=/; expires=%s"  % ( sessioncookie, formatteddate))]
 
-        return headers, """<html>
-        <body>
-        Floible!
-        </body>
-        </html>"""
+        return headers, Interstitials.confirmed_template
 
     if structure[0] == "error":
         structure[1]["record"] = pprint.pformat( structure[1]["record"] )
-        page = error % structure[1]
+        page = Interstitials.error % structure[1]
         headers = []        
         if structure[1].get("setcookies", False):
             cookies = structure[1]["setcookies"]
             for cookie in cookies:
                 headers.append( ("Set-Cookie", "%s=%s" % ( cookie, cookies[cookie]) ) )
-#                   "setcookies" : {"sessioncookie" : ""},
 
         return headers, page
 
-    return [], failback % { "body" : pprint.pformat(structure) }
+    return [], Interstitials.failback % { "body" : pprint.pformat(structure) }
     
 
 def page_render_html(json, **argd):
