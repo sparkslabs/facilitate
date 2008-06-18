@@ -103,11 +103,14 @@ class CookieExtracter(object):
 
     def __call__(self, environ, start_response):
         cookies_in = SimpleCookie()
-        cookies_in.load(environ["HTTP_COOKIE"])
-        cookies = {}
-        for C in cookies_in:
-            cookies[C] = cookies_in[C].value
-        environ["bbc.cookies"] = cookies
+        try:
+            cookies_in.load(environ["HTTP_COOKIE"])
+            cookies = {}
+            for C in cookies_in:
+                cookies[C] = cookies_in[C].value
+            environ["bbc.cookies"] = cookies
+        except KeyError:
+            pass
         R = self.application(environ, start_response)
         for line in R:
             yield line
