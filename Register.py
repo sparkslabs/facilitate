@@ -202,8 +202,30 @@ def page_logic(json, **argd):
         env = argd.get("__environ__")
         cookie = env["bbc.cookies"].get("sessioncookie",None)
         if cookie:
-            userid = CookieJar.getUser(cookie)
-            R = Registrations.get_record(userid)
+            try:
+                userid = CookieJar.getUser(cookie)
+            except CookieJar.NoSuchUser:
+               return [ "error",
+                 { "message" : "Can't find your registration associated with your cookie",
+                   "record" : {},
+                   "problemfield" : "regid",
+                   "setcookies" : {"sessioncookie" : ""},
+                  }
+               ]
+
+            try:
+                R = Registrations.get_record(userid)
+            except IOError: # probably means the db has been deleted/zapped
+               CookieJar.wipePairing(cookie, userid)
+               return [ "error",
+                 { "message" : "Can't find your registration associated with your cookie - maybe it was deleted?",
+                   "record" : {},
+                   "problemfield" : "regid",
+                   "setcookies" : {"sessioncookie" : ""},
+                  }
+               ]
+                   
+                 
         else:
             R = {"not": "found" }
             
