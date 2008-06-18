@@ -107,10 +107,7 @@ class CookieExtracter(object):
         cookies = {}
         for C in cookies_in:
             cookies[C] = cookies_in[C].value
-#            pass
-#            cookies[C.key] = C.value
         environ["bbc.cookies"] = cookies
-#        environ["bbc.cookies"] = dict(cookies_in)
         R = self.application(environ, start_response)
         for line in R:
             yield line
