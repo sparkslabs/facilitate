@@ -6,7 +6,7 @@ import cjson
 class EntitySet(object):
     data = "data"
 
-    @classmethod
+#    @classmethod
     def Zap(cls, name="Demo", key="personid"):
         try:
             files = os.listdir(cls.data + "/" + name)
@@ -19,6 +19,7 @@ class EntitySet(object):
             errno, err = e
             if errno != 2:
                 raise
+    Zap = classmethod(Zap)
 
     def __init__(self, name="Demo", key="personid"):
         self.meta = self.__get_meta(name=name, key=key)
