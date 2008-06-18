@@ -88,7 +88,7 @@ class JSON_Interceptor(object):
             if environ["bbc.args"].get("__json__"):
                 import sys
                 json = environ["bbc.args"]["__json__"]
-                sys.stderr.write("JSON: %s\n" % json)
+#                sys.stderr.write("JSON: %s\n" % json)
                 environ["bbc.args"]["__json__"] = cjson.decode(json)
 
         R = self.application(environ, start_response)
@@ -144,12 +144,12 @@ class CGI_Parser(object):
             try:
                X_filename = X[f].filename
             except AttributeError:
-               sys.stderr.write("Hmmm (%s)\n" %  f )
+#               sys.stderr.write("Hmmm (%s)\n" %  f )
                env[f] = X.getvalue(f)
                continue
 
             if X[f].filename is None:
-                sys.stderr.write("Hmmm (%s)\n" %  f )
+#                sys.stderr.write("Hmmm (%s)\n" %  f )
                 env[f] = X.getvalue(f)
             else:
                 if X[f].filename != "":
@@ -160,10 +160,10 @@ class CGI_Parser(object):
                         extension = "dat"
                     filename = filename + os.path.extsep + extension
                     self.save_upload(X[f], filename)
-                    sys.stderr.write("We were sent a file %s (%s, to save as %s)\n" % (X[f].filename, f, filename) )
+#                    sys.stderr.write("We were sent a file %s (%s, to save as %s)\n" % (X[f].filename, f, filename) )
                     env[f+".__originalfilename"] = X[f].filename
                     env[f+".__filename"] = filename
-                    sys.stderr.write("key: %s filename: %s\n" % (f+".__filename",  filename))
+#                    sys.stderr.write("key: %s filename: %s\n" % (f+".__filename",  filename))
         environ["bbc.args"] = env
         for line in self.application(environ, start_response):
             yield line
