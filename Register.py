@@ -286,6 +286,7 @@ def page_logic(json, **argd):
              }
            ]
 
+import MailConfirmCode
 
 def MakeHTML( structure ):
     structure[1]["record"]["password"] = "****"
@@ -295,6 +296,19 @@ def MakeHTML( structure ):
         return [], notdirect
 
     if structure[0] == "new":
+        app = "http://bicker.kamaelia.org/cgi-bin/app/register?action=confirmcode&"
+        app_args =  "regid=%(regid)s&confirmationcode=%(confirmcode)s" % {
+                                  "regid" : structure[1]["record"]["regid"],
+                                  "confirmcode" : structure[1]["record"]["confirmationcode"],
+                           }
+        confirm_url = app + app_args
+
+        MailConfirmCode.sendMail( structure[1]["record"]["screenname"],
+                                  structure[1]["record"]["email"],
+                                  confirm_url,
+                                  "The Bicker Manor Team",
+                                  "User registration confirmation for 'Bicker Manor'")
+
         page = Interstitials.registration_success % {
                        "body" : pprint.pformat(structure),
                        "confirmationcode" : structure[1]["record"]["confirmationcode"],
