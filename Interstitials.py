@@ -51,12 +51,8 @@ notdirect = head + """
 
 # ----------------------------------------------------------------------------
 
-registration_success = head + """
-<P><B> Thank you!</b>
-<P> You are <b>nearly</b> registered!
-<P> You will receive an email shortly with a link and confirmation code in. You will need
-    to click on the link to confirm your identity.
-<P> Alternatively you may enter your confirmation code here:
+manual_frag = """
+<!-- <P> Alternatively you may enter your confirmation code here:
 <ul>
 <form method="get" action="/cgi-bin/app/register">
     <P><input type="text" name="action"       value="confirmcode">
@@ -65,6 +61,14 @@ registration_success = head + """
     <input type="submit" value="submit confirm code">
 </form>
 </ul>
+-->
+"""
+
+registration_success = head + """
+<P><B> Thank you!</b>
+<P> You are <b>nearly</b> registered!
+<P> You will receive an email shortly with a link and confirmation code in. You will need
+    to click on the link to confirm your identity.
 <P>You entered the following information:
 <ul>
 <li> email: %(email)s (this is what you will use to login)
