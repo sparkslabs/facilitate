@@ -206,10 +206,10 @@ def page_logic(json, **argd):
                 userid = CookieJar.getUser(cookie)
             except CookieJar.NoSuchUser:
                return [ "error",
-                 { "message" : "Can't find your registration associated with your cookie",
+                 { "message" : "Can't find your registration associated with your cookie"+repr(cookie),
                    "record" : {},
                    "problemfield" : "regid",
-                   "setcookies" : {"sessioncookie" : ""},
+                   "setcookies" : {"sessioncookie" : ";path=/"},
                   }
                ]
 
@@ -221,17 +221,23 @@ def page_logic(json, **argd):
                  { "message" : "Can't find your registration associated with your cookie - maybe it was deleted?",
                    "record" : {},
                    "problemfield" : "regid",
-                   "setcookies" : {"sessioncookie" : ""},
+                   "setcookies" : {"sessioncookie" : ";path=/"},
                   }
                ]
                    
                  
         else:
-            R = {"not": "found" }
+            return [ "error",
+                 { "message" : "Can't dump anything since you don't have a session cookie - please try registering :)",
+                   "record" : {},
+                   "problemfield" : "",                 
+                   "setcookies" : {"sessioncookie" : ";path=/"},
+                 }
+                ]
             
         return [ "error",
-                 { "message": "nearly implemented!" + pprint.pformat(R),
-                   "record" : {},
+                 { "message": "nearly implemented!",# + pprint.pformat(R),
+                   "record" : R,
                    "problemfield" : ""
                  }
                ]
@@ -372,7 +378,14 @@ def MakeHTML( structure ):
     if structure[0] == "error":
         structure[1]["record"] = pprint.pformat( structure[1]["record"] )
         page = error % structure[1]
-        return [], page
+        headers = []        
+        if structure[1].get("setcookies", False):
+            cookies = structure[1]["setcookies"]
+            for cookie in cookies:
+                headers.append( ("Set-Cookie", "%s=%s" % ( cookie, cookies[cookie]) ) )
+#                   "setcookies" : {"sessioncookie" : ""},
+
+        return headers, page
 
     return [], failback % { "body" : pprint.pformat(structure) }
     
