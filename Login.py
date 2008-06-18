@@ -7,6 +7,7 @@ import random                       # for confirmation codes
 import time                         # to check age
 import pprint                       # for dumping errors
 
+import Interstitials
 import CookieJar
 import Cookie
 from model.Record import EntitySet  # For access to the temporary DB
@@ -55,34 +56,6 @@ def page_logic(json, **argd):
              }
            ]
 
-failback = """<html>
-<body>
-<P>Should never ever see this...
-<pre>
-%(body)s
-</pre>
-</body>
-</html>"""
-
-error = """<html>
-<body>
-<P><B>ERROR: %(message)s
-<P> Record
-<pre>
-%(record)s
-</pre>
-</body>
-</html>"""
-
-loggedin_template = """<html>
-<body>
-<P>Thanks for logging in!
-<P> Next step should be a redirect, or similar - for now,
-<a href="/MyProfile"> click here to go to your profile </a>
-</body>
-</html>
-"""
-
 def MakeHTML( structure ):
 
     if structure[0] == "loggedin":
@@ -93,11 +66,11 @@ def MakeHTML( structure ):
 
         headers = [("Set-Cookie", "sessioncookie=%s; path=/; expires=%s"  % ( sessioncookie, formatteddate))]
 
-        return headers, loggedin_template
+        return headers, Interstitials.loggedin_template
 
     if structure[0] == "error":
         structure[1]["record"] = pprint.pformat( structure[1]["record"] )
-        page = error % structure[1]
+        page = Interstitials.error % structure[1]
         headers = []        
         if structure[1].get("setcookies", False):
             cookies = structure[1]["setcookies"]
@@ -106,7 +79,7 @@ def MakeHTML( structure ):
 
         return headers, page
 
-    return [], failback % { "body" : pprint.pformat(structure) }
+    return [], Interstitials.failback % { "body" : pprint.pformat(structure) }
     
 
 def page_render_html(json, **argd):
