@@ -38,6 +38,22 @@ def getUser(cookie):
     Cookies.close()
     return user
 
+def wipePairing(cookie,userid):
+    Cookies = anydbm.open(cookiesFile, "c")
+    try:
+        Cookies["cookie:"+cookie]
+        del Cookies["cookie:"+cookie]
+    except KeyError:
+       pass
+    try:
+        Cookies["user:"+userid]
+        del Cookies["user:"+userid]
+    except KeyError:
+       pass
+        
+    Cookies.close()
+
+
 def zapCookies():
     Cookies = anydbm.open(cookiesFile, "n")
     Cookies.close()
