@@ -101,3 +101,11 @@ loggedin_template = head + """
 <P> You could of course also go back <a href="/Home">Home</a>.
 """ + foot
 
+contact_added = head + """
+<h3>Contact Added!</h3>
+<P> <a href="/BrowseParticipants">Browse more contacts</a> to add
+<P> Got to <a href="/MyFriends">your friends page</a>
+<P> <a href="/MyProfile"> Go back to your profile </a>
+<P> You could of course also go back <a href="/Home">Home</a>.
+""" + foot
+
