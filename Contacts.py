@@ -99,118 +99,10 @@ def page_logic(json, **argd):
         else:
             stored_rec = Contacts.new_record(rec)
 
-
-        return [
-                  "error",
-                  {
-                    "message" : "OK, Adding contacts isn't quite implemented yet... <a href='/BrowseParticipants'> more </a>",
-                    "record" : "",
-                    "problemfield" : "",
-                  }
-               ]
-        try:
-
-            R = reg_new(**argd) # This internally validates the record before creating it. This thefore means a possible crash at this point
-            return [ 
-                     "new",  
-                     { "message" : "Thank you for signing up. Just need to confirm your registration now!",
-                       "record" : R,
-                     }
-                   ]
-
-        except ValueError, e:
-            try:
-                (R, field, Reason) = e.args
-            except ValueError:
-                raise e
-            return [ 
-                     "error",  
-                     { "message" : Reason,
-                       "record" : R,
-                       "problemfield" : field,
-                     }
-                   ]
-        # end of action=new ------------------------------------------------------------------------
-
-    if argd.get("action", "") == "dump":
-        env = argd.get("__environ__")
-        cookie = env["bbc.cookies"].get("sessioncookie",None)
-        if cookie:
-            try:
-                userid = CookieJar.getUser(cookie)
-            except CookieJar.NoSuchUser:
-               return [ "error",
-                 { "message" : "Can't find your registration associated with your cookie"+repr(cookie),
-                   "record" : {},
-                   "problemfield" : "regid",
-                   "setcookies" : {"sessioncookie" : ";path=/"},
-                  }
-               ]
-
-            try:
-                R = Registrations.get_record(userid)
-            except IOError: # probably means the db has been deleted/zapped
-               CookieJar.wipePairing(cookie, userid)
-               return [ "error",
-                 { "message" : "Can't find your registration associated with your cookie - maybe it was deleted?",
-                   "record" : {},
-                   "problemfield" : "regid",
-                   "setcookies" : {"sessioncookie" : ";path=/"},
-                  }
-               ]
-                   
-                 
-        else:
-            return [ "error",
-                 { "message" : "Can't dump anything since you don't have a session cookie - please try registering :)",
-                   "record" : {},
-                   "problemfield" : "",                 
-                   "setcookies" : {"sessioncookie" : ";path=/"},
-                 }
-                ]
-            
-        return [ "error",
-                 { "message": "nearly implemented!",# + pprint.pformat(R),
-                   "record" : R,
-                   "problemfield" : ""
+        return [ "contactadded",
+                 { "message" : "Contact successfully added"
                  }
                ]
-
-    if argd.get("action", "") == "confirmcode":
-        if argd.get("regid",None) == None:
-             return [ "error",
-                      { "Message" : "Sorry, I can't confirm your registration without a registration id",
-                        "record" : {},
-                        "problemfield" : "regid",
-                      }
-                    ]
-
-        if argd.get("confirmationcode",None) == None:
-             return [ "error",
-                      { "Message" : "Sorry, I can't confirm your registration without a confirmation code",
-                        "record" : {},
-                        "problemfield" : "confirmationcode",
-                      }
-                    ]
-            
-        registration = Registrations.get_record(argd.get("regid",""))
-        if registration["confirmationcode"] == argd.get("confirmationcode",""):
-             registration["confirmed"] = True
-             Registrations.store_record(registration)
-             cookie = CookieJar.getCookie(argd["regid"])
-             
-             return [ "confirmed",
-                      { "message" : "Thank you for confirming your registration. Your account is now active.",
-                        "sessioncookie" : cookie,
-                        "record" : registration }
-                    ]
-        else:
-             return [ "error",
-                      { "Message" : "There's an error with the confirmation code you're using",
-                      }
-                    ]
-             
-        # end of action=confirmcode ------------------------------------------------------------------------
 
     return [ 
              "__default__",  
@@ -226,36 +118,8 @@ def MakeHTML( structure ):
     if structure[0] == "__default__":
         return [], notdirect
 
-    if structure[0] == "new":
-        app = "http://bicker.kamaelia.org/cgi-bin/app/register?action=confirmcode&"
-        app_args =  "regid=%(regid)s&confirmationcode=%(confirmcode)s" % {
-                                  "regid" : structure[1]["record"]["regid"],
-                                  "confirmcode" : structure[1]["record"]["confirmationcode"],
-                           }
-        confirm_url = app + app_args
-
-        page = Interstitials.registration_success % {
-                       "body" : pprint.pformat(structure),
-                       "confirmationcode" : structure[1]["record"]["confirmationcode"],
-                       "regid"       : structure[1]["record"]["regid"],
-                       "email"       : structure[1]["record"]["email"],
-                       "screenname"  : structure[1]["record"]["screenname"],
-                       "dob.day"     : structure[1]["record"]["dob.day"],
-                       "dob.month"   : structure[1]["record"]["dob.month"],
-                       "dob.year"    : structure[1]["record"]["dob.year"],
-                       "side"        : structure[1]["record"]["side"],
-                   }
-        return [], page
-
-    if structure[0] == "confirmed":
-
-        sessioncookie = structure[1]["sessioncookie"]
-        expirytime = time.gmtime(time.time()+31000000) # approx 1 year
-        formatteddate = time.strftime("%a, %d-%b-%Y %H:%M:%S %Z", expirytime)
-
-        headers = [("Set-Cookie", "sessioncookie=%s; path=/; expires=%s"  % ( sessioncookie, formatteddate))]
-
-        return headers, Interstitials.confirmed_template
+    if structure[0] == "contactadded":
+        return [], Interstitials.contact_added
 
     if structure[0] == "error":
         structure[1]["record"] = pprint.pformat( structure[1]["record"] )
