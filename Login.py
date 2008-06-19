@@ -32,7 +32,7 @@ def page_logic(json, **argd):
     else:
         return [
                  "error",
-                 { "message": "Sorry, could not log you in - please check your email & password - 1",
+                 { "message": "Sorry, could not log you in - please check your email & password",
                    "record" : {},
                    "problemfield" : "",
                  }
@@ -40,21 +40,30 @@ def page_logic(json, **argd):
     if r["password"] != md5.md5(argd["password"]).hexdigest():
         return [
                  "error",
-                 { "message": "Sorry, could not log you in - please check your email & password - 2",
+                 { "message": "Sorry, could not log you in - please check your email & password.",
                    "record" : {},
                    "problemfield" : "",
                  }
                ]
 
-    cookie = CookieJar.getCookie(r["regid"])
-    return [
-             "loggedin",
-             {
-                "message": "Login successful",
-                "user" : r["screenname"],
-                "sessioncookie" : cookie,
-             }
-           ]
+    if r["confirmed"]:
+       cookie = CookieJar.getCookie(r["regid"])
+       return [
+                "loggedin",
+                {
+                   "message": "Login successful",
+                   "user" : r["screenname"],
+                   "sessioncookie" : cookie,
+                }
+              ]
+    else:
+        return [
+                 "error",
+                 { "message": "Sorry, you need to confirm your identity before you can login!",
+                   "record" : {},
+                   "problemfield" : "",
+                 }
+               ]
 
 def MakeHTML( structure ):
 

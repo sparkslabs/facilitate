@@ -31,6 +31,7 @@ failback = head + """
 <pre>
 %(body)s
 </pre>
+<P> Go back <a href="/Home">Home </a>?
 """ + foot
 
 # ----------------------------------------------------------------------------
@@ -41,6 +42,8 @@ error = head + """
 <pre>
 %(record)s
 </pre>
+
+<P> Go back <a href="/Home">Home </a>?
 """ + foot
 
 # ----------------------------------------------------------------------------
@@ -77,6 +80,7 @@ registration_success = head + """
 <li> Side chosen: %(side)s
 </ul>
 <p> We're obviously not displaying your password!
+<P> Go back <a href="/Home">Home </a> whilst you wait for your mail?
 """ + foot
 
 # ----------------------------------------------------------------------------
@@ -85,6 +89,7 @@ confirmed_template = head + """
 <P> Many thanks for confirming your identity.
 <P> Next step should be a redirect, or similar - for now,
 <a href="/MyProfile"> click here to go to your profile! </a>
+<P> You could of course also go back <a href="/Home">Home</a>.
 """ + foot
 
 # ----------------------------------------------------------------------------
@@ -93,5 +98,6 @@ loggedin_template = head + """
 <P>Thanks for logging in!
 <P> Next step should be a redirect, or similar - for now,
 <a href="/MyProfile"> click here to go to your profile </a>
+<P> You could of course also go back <a href="/Home">Home</a>.
 """ + foot
 
