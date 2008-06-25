@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+#
+# NOTBICKER
+#
 
 from bbcwsgitools import EnvironDumper, JSON_Interceptor, CGI_Parser, Functional
 from Users  import page_render_html
