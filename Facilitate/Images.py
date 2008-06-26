@@ -2,124 +2,138 @@
 """
 This script handles user registrations
 """
-import md5                          # for hexdigest
-import random                       # for confirmation codes
-import time                         # to check age
-import pprint                       # for dumping errors
 
+# import md5                          # for hexdigest
+# import random                       # for confirmation codes
+# import time                         # to check age
+# import pprint                       # for dumping errors
+
+import sys
+import shutil
+import pprint
 import CookieJar
-import Cookie
+
 from model.Record import EntitySet  # For access to the temporary DB
 import Interstitials
 
 
-def new_contacts(**argd):
+def new_image(**argd):
     rec = {
       # --------------------------------------------------------- Required to create a new record
-        'dob.day'          : argd.get("dob.day", ""),
-        'dob.month'        : argd.get("dob.month", ""),
-        'dob.year'         : argd.get("dob.year", ""),
-        'email'            : argd.get("email", ""),
-        'password'         : argd.get("password", ""),
-        'passwordtwo'      : argd.get("passwordtwo", ""),
-        'screenname'       : argd.get("screenname", ""),
-        'side'             : argd.get("side", ""),
+        "uploaded_file"     : argd.get("uploaded_file",""),
+        "unique_name"       : argd.get("unique_name",""),
+        "userid"            : argd.get("userid",""),
+        "original_filename" : argd.get("original_filename",""),
+        "trimmed_filename"  : argd.get("trimmed_filename",""),
     }
-    # --------------------------------------------------------- Sprinkle with default metadata
-    rec["confirmed"] = False
-    rec["confirmationcode"] = generate_confirmation_code()
-    rec["personrecord"] = ""
-
-    # -------------------------------------------- Validations... (lots of these)
-
-    validate_record(rec) # Seperated out to a seperate function to make logic clearer
-
-    # ---------------------------------------------------------  TRANSFORMS FOR STORAGE
-    #    One way hash for security reasons before storage
-    #    NOTE: This means we always check the digest, not the value
-    #          This also means we can do a password reset, not a password reminder
-    #
-    if rec["password"] != "":
-        rec["password"] = md5.md5(rec["password"]).hexdigest()
-
-    if rec["passwordtwo"] != "":
-        rec["passwordtwo"] = md5.md5(rec["passwordtwo"]).hexdigest()
 
     # --------------------------------------------------------- Actual storage
-    stored_rec = Registrations.new_record(rec)
+    stored_rec = Images.new_record(rec)
     return stored_rec
 
-
 def page_logic(json, **argd):
-    if argd.get("action", "") == "addcontact":
-        contact   = argd.get("contact", None)
-        contactof = argd.get("contactof", None)        
-        if contact is None:
-            return [
-                      "error",
-                      {
-                        "message" : "Need to have contact to add to",
-                        "record" : "",
-                        "problemfield" : "contact",
-                      }
-                   ]
+    env = argd.get("__environ__")
+    userid = None
+    record = None
 
-        if contactof is None:
-            return [
-                      "error",
-                      {
-                        "message" : "Need to know who to add this as a contact of...",
-                        "record" : "",
-                        "problemfield" : "contactof",
-                      }
-                   ]
-        
-        contacts = Contacts.read_database()
-        for rec in contacts:
-            if rec["contactof"] == contactof:
-                break # Found the record
-        else:
-            rec = { "contactof" : contactof, "contacts" : [ ] }
-            
-        if contact not in rec["contacts"]:
-            rec["contacts"].append( contact )
-        else:
-            return [
-                      "error",
-                      {
-                        "message" : "You've already added this person as a contact! <a href='/BrowseParticipants'> more </a>",
-                        "record" : "",
-                        "problemfield" : "contactof",
-                      }
-                   ]
+    if argd.get("action", "") == "":
+        return [ "__default__",
+          { "message" : "Sorry, this is not meant to be called directly",
+            "record" : {},
+            "problemfield" : "regid",
+           }
+        ]
 
-
-        if rec.get("contactid", None):
-            stored_rec = Contacts.store_record(rec)
-        else:
-            stored_rec = Contacts.new_record(rec)
-
-        return [ "contactadded",
-                 { "message" : "Contact successfully added"
-                 }
+    if argd.get("action", "") == "upload":
+        cookie = env["bbc.cookies"].get("sessioncookie",None)
+        if cookie:
+            try:
+                userid = CookieJar.getUser(cookie)
+            except CookieJar.NoSuchUser:
+               sys.stderr.write("line 41\n")
+               return [ "error",
+                 { "message" : "Can't identify you, so not accepting your submission, sorry - try logging out and in again"+repr(cookie),
+                   "record" : {},
+                   "problemfield" : "regid",
+                   "setcookies" : {"sessioncookie" : ";path=/"},
+                  }
                ]
+        else:
+            sys.stderr.write("line 51\n")
+            return [ "error",
+              { "message" : "Can't identify you, so not accepting your submission, sorry - try logging in or registering!",
+                "record" : {},
+                "problemfield" : "regid",
+                "setcookies" : {"sessioncookie" : ";path=/"},
+               }
+            ]
 
-    return [ 
-             "__default__",  
-             { "message" : "Hello World"+pprint.pformat(argd),
-               "record" : {}
+        # We now have a valid userid.
+        # OK, where's the uploaded data?
+        image_file = argd.get("upload.filename.__filename", None)
+        original_name = argd.get("upload.filename.__originalfilename", None)
+        if (image_file == None) or (original_name == None):
+            return [ "error",
+              { "message" : "You need to upload a file for this method",
+                "record" : argd,
+                "problemfield" : "upload.filename",
+               }
+            ]
+        try:
+            import Image
+            Image.open(image_file)
+        except IOError:
+            return [ "error",
+              { "message" : "Sorry, but that doesn't seem to be an image",
+                "record" : {},
+                "problemfield" : "upload.filename",
+               }
+            ]
+
+        # Data we have right now:
+        #
+        # We have a valid userid
+        # image_file contains a valid filename
+        # upload.filename.__originalfilename
+        # We know it's not moderated.
+        #    - Moderation is being handled by a file moving from a to b to c
+        #    - we really ought to have the image filename without the directory name
+        trimmed = image_file[image_file.rfind("/")+1:]
+        unique = trimmed[:trimmed.rfind(".")]
+        record = {
+            "uploaded_file": image_file,
+            "unique_name": unique,
+            "userid" : userid,
+            "original_filename" : original_name,
+            "trimmed_filename" :  trimmed,
+        }
+        try:
+           shutil.copytree("/srv/www/sites/bicker.kamaelia.org/template/images", 
+                           "/srv/www/sites/bicker.kamaelia.org/docs/images/user/%(unique_name)s" % record )
+        except OSError:
+           pass
+        record = new_image(**record)
+
+    return [
+             "uploadok",
+             {
+                "message": "Upload Successful",
+                "user" : "",
              }
            ]
+
 
 # import MailConfirmCode
 
 def MakeHTML( structure ):
 
-    if structure[0] == "__default__":
-        return [], notdirect
+    sys.stderr.write(pprint.pformat(structure)+"\n")
 
-    if structure[0] == "contactadded":
-        return [], Interstitials.contact_added
+    if structure[0] == "__default__":
+        return [], Interstitials.notdirect
+
+    if structure[0] == "uploadok":
+        return [], Interstitials.uploadok
 
     if structure[0] == "error":
         structure[1]["record"] = pprint.pformat( structure[1]["record"] )
@@ -141,6 +155,7 @@ def page_render_html(json, **argd):
     headers = [('Content-type', "text/html")]
     return status, headers+extra_headers, page
 
+Images        = EntitySet("images",        key="imageid")
 Registrations = EntitySet("registrations", key="regid")
 Contacts      = EntitySet("contacts",      key="contactid")
 
