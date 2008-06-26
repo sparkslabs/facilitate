@@ -3,8 +3,8 @@
 # MORPH_BICKER
 #
 
-from bbcwsgitools import EnvironDumper, JSON_Interceptor, CGI_Parser, Functional
-from Items_People import page_render_html
+from Facilitate.bbcwsgitools import EnvironDumper, JSON_Interceptor, CGI_Parser, Functional
+from Facilitate.Items_People import page_render_html
 
 if __name__ == "__main__":
     import cgitb ; cgitb.enable()
