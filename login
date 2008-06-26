@@ -3,8 +3,8 @@
 # BICKER
 #
 
-from bbcwsgitools import EnvironDumper, JSON_Interceptor, CGI_Parser, Functional, CookieExtracter
-from Login import page_render_html
+from Facilitate.bbcwsgitools import EnvironDumper, JSON_Interceptor, CGI_Parser, Functional, CookieExtracter
+from Facilitate.Login import page_render_html
 
 
 if __name__ == "__main__":

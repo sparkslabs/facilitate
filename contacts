@@ -2,8 +2,8 @@
 #
 # BICKER
 # 
-from bbcwsgitools import EnvironDumper, JSON_Interceptor, CGI_Parser, Functional, CookieExtracter
-from Contacts import page_render_html
+from Facilitate.bbcwsgitools import EnvironDumper, JSON_Interceptor, CGI_Parser, Functional, CookieExtracter
+from Facilitate.Contacts import page_render_html
 
 
 if __name__ == "__main__":
