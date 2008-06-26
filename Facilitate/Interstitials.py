@@ -109,3 +109,10 @@ contact_added = head + """
 <P> You could of course also go back <a href="/Home">Home</a>.
 """ + foot
 
+
+uploadok = head + """\
+<h3>Image Uploaded OK!</h3>
+<P> <a href="/MyMedia">Back to your media</a>  to view & add more
+<P> <a href="/MyProfile"> Go back to your profile </a>
+<P> You could of course also go back <a href="/Home">Home</a>.
+""" + foot
