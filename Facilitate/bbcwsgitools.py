@@ -122,12 +122,33 @@ class CGI_Parser(object):
 
     def get_new_filename(self):
         try:
-            files = os.listdir(self.upload_dir)
-        except OSError:
-            os.makedirs(self.upload_dir)
-            files  = os.listdir(self.upload_dir)
-        next = len(files) # This is fragile...
+            F = open( os.path.join(self.upload_dir, ".meta") )
+            X = F.read()
+            F.close()
+        except IOError:
+            X = ""
+
+        try:
+            meta = cjson.decode(X)
+        except cjson.DecodeError:
+            meta = { }
+
+        next = meta.get("max", 0)+1
+        meta["max"] = next
+
+        F = open( os.path.join(self.upload_dir, ".meta"), "w" )
+        F.write( cjson.encode(meta) )
+        F.close()
+
         return os.path.join(self.upload_dir, str(next))
+                
+#        try:
+#            files = os.listdir(self.upload_dir)
+#        except OSError:
+#            os.makedirs(self.upload_dir)
+#            files  = os.listdir(self.upload_dir)
+#        next = len(files) # This is fragile...
+#        return os.path.join(self.upload_dir, str(next))
 
     def save_upload(self, fileitem, filename):
         if not fileitem.file:
