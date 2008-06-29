@@ -116,3 +116,10 @@ uploadok = head + """\
 <P> <a href="/MyProfile"> Go back to your profile </a>
 <P> You could of course also go back <a href="/Home">Home</a>.
 """ + foot
+
+video_uploadok = head + """\
+<h3>Video Uploaded OK!</h3>
+<P> <a href="/MyMedia">Back to your media</a>  to view & add more
+<P> <a href="/MyProfile"> Go back to your profile </a>
+<P> You could of course also go back <a href="/Home">Home</a>.
+""" + foot
