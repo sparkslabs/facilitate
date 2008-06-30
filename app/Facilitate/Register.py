@@ -293,7 +293,7 @@ def MakeHTML( structure ):
     structure[1]["record"]["passwordtwo"] = "****"
 
     if structure[0] == "__default__":
-        return [], notdirect
+        return [], Interstitials.notdirect
 
     if structure[0] == "new":
         app = "http://bicker.kamaelia.org/cgi-bin/app/register?action=confirmcode&"
