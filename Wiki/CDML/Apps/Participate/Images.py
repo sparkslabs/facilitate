@@ -11,6 +11,7 @@ EntitySet.data = "/srv/www/sites/bicker.kamaelia.org/cgi/app/data"
 
 Images        = EntitySet("images", key="imageid")
 Registrations = EntitySet("registrations", key="regid")
+Contacts      = EntitySet("contacts", key="contactid")
 
 loggedout = False
 
@@ -89,6 +90,10 @@ class tagHandler(object):
               for image in images:
                   if image["userid"] == userid:
                       user_images.append(image)
+
+              if user_images == []:
+                  return "You haven't uploaded any images yet! Why not?"
+
               Y = [ x["unique_name"] for x in user_images]
               images = []
               i = 0
@@ -111,7 +116,49 @@ class tagHandler(object):
               return repr(Y)
           else:
               return "can't give you images, you're not logged in"
-          
+
+
+      def doFriendsImages(bunch, text, env):
+          userid = loggedIn(env)
+          if not userid:
+              return "Can't show you your friends images - you're not logged in!"
+
+          for rec in Contacts.read_database():
+              if rec["contactof"] == userid:
+                  break
+          else:
+              return "Sorry - I can't show you any images from your friends - maybe you haven't added any contacts?"
+
+          # userid contains the user
+          # rec["contacts"] contains the list of friend ids.
+
+          images = Images.read_database()
+          user_images = []
+          for image in images:
+              if image["userid"] in rec["contacts"]:
+                  user_images.append(image)
+
+          if user_images == []:
+              return "Your friends haven't uploaded any images yet! Get them to do something!"
+          images = []
+          i = 0
+          for image in user_images:
+              i = i +1
+              if i % 4 == 0:
+                   image["extra"] = " last"
+              else:
+                   image["extra"] = ""
+              image = """\
+<div class='column twoC%(extra)s button'>
+<a href="/Picture?image=%(unique_name)s">
+<img border="0" src='/images/user/%(unique_name)s/thumb.jpg'>
+</a></div>
+""" % image
+              if i % 4 == 0:
+                  image += '<div class="divide"></div>'
+              images.append(image)
+          return "".join(images)+ '<div class="divide"></div>'
+
       def doOnePictureViewer(bunch, text, env):
           image = bunch.get("image", text)
           if ".." in "image":
@@ -136,6 +183,7 @@ class tagHandler(object):
            "uploadone_form" : doUploadForm,
            "userimages" : doUserImages,
            "alluserimages" : doAllUserImages,
+           "friendsimages" : doFriendsImages,
       }
 
 mapping = tagHandler.mapping
