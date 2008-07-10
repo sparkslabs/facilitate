@@ -12,7 +12,8 @@ smtpuser = ''  # for SMTP AUTH, set SMTP username here
 smtppass = ''  # for SMTP AUTH, set SMTP password here
 
 smtpserver = "127.0.0.1"
-SENDER = 'do_not_reply@bicker.kamaelia.org'
+HOSTDOMAIN = "bicker"
+SENDER = 'do_not_reply@' + HOSTDOMAIN
 
 # ----------------------------------------------------------------------------------------
 #
@@ -24,7 +25,7 @@ Hi!
 We've received a request to create a user account on the "Bicker Manor"
 website, using this email address for verification. Hopefully this is
 you!
-   [1] http://bicker.kamaelia.org/Home
+   [1] http://%(hostdomain)s/Home
 
 They entered the following details:
 
@@ -53,7 +54,7 @@ validation_html = """\
 <P>Hi!
 
 <P>We've received a request to create a user account on the 
-<a href="http://bicker.kamaelia.org/Home">"Bicker Manor"</a>
+<a href="http://%(hostdomain)s/Home">"Bicker Manor"</a>
 website, using this email address for verification. Hopefully this is
 you!
 
@@ -110,6 +111,7 @@ def sendMail(screenname, email, validation_url, admin, subject):
         "email" : email,
         "validation_url" : validation_url,
         "admin" : admin,
+        "hostdomain" : HOSTDOMAIN,
     }
     plainmail = validation_plaintext %  bundle
     htmlmail  = validation_html      % bundle
@@ -121,7 +123,9 @@ def sendMail(screenname, email, validation_url, admin, subject):
                  "subject" : subject,
                  "plaintext_email" : plainmail,
                  "html_email" : htmlmail,
+                 "hostdomain" : HOSTDOMAIN,
            }
+    mail = mail % {"hostdomain" : HOSTDOMAIN }
     session = smtplib.SMTP(smtpserver)
     if AUTHREQUIRED:
         session.login(smtpuser, smtppass)
@@ -133,7 +137,7 @@ if __name__ == "__main__":
 
     print sendMail("Michael", 
                "ms@cerenity.org",
-               "http://bicker.kamaelia.org/cgi-bin/app/register?action=confirmcode&regid=0&confirmationcode=c858dc05e905bacdb4fba0ca325ca1cd",
+               "http://%(hostdomain)s/cgi-bin/app/register?action=confirmcode&regid=0&confirmationcode=c858dc05e905bacdb4fba0ca325ca1cd",
                "The Bicker Manor Team",
                "User registration confirmation for 'Bicker Manor'")
 

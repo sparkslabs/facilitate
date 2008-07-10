@@ -6,7 +6,7 @@ import md5
 
 class NoSuchUser(Exception): pass
 
-cookiesFile = "/data/Cookies/Cookies.dbm"
+cookiesFile = "/tmp/Cookies.dbm"
 
 def _newCookie(Cookies):
     try:

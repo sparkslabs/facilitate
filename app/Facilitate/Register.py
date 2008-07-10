@@ -12,6 +12,8 @@ import Cookie
 from model.Record import EntitySet  # For access to the temporary DB
 import Interstitials
 
+hostdomain = "bicker"
+
 def generate_confirmation_code():
     return md5.md5(str(random.randint(100000000000,1000000000000))).hexdigest()
 
@@ -296,7 +298,7 @@ def MakeHTML( structure ):
         return [], Interstitials.notdirect
 
     if structure[0] == "new":
-        app = "http://bicker.kamaelia.org/cgi-bin/app/register?action=confirmcode&"
+        app = "http://%(hostdomain)s/cgi-bin/app/register?action=confirmcode&" % { "hostdomain" : hostdomain }
         app_args =  "regid=%(regid)s&confirmationcode=%(confirmcode)s" % {
                                   "regid" : structure[1]["record"]["regid"],
                                   "confirmcode" : structure[1]["record"]["confirmationcode"],

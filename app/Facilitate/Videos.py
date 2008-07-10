@@ -15,6 +15,7 @@ import CookieJar
 
 from model.Record import EntitySet  # For access to the temporary DB
 import Interstitials
+basedir = "/srv/www/sites/bicker"
 
 
 def new_video(**argd):
@@ -109,8 +110,8 @@ def page_logic(json, **argd):
             "trimmed_filename" :  trimmed,
         }
 #        try:
-#           shutil.copytree("/srv/www/sites/bicker.kamaelia.org/template/videos", 
-#                           "/srv/www/sites/bicker.kamaelia.org/docs/videos/user/%(unique_name)s" % record )
+#           shutil.copytree(basedir + "/template/videos", 
+#                           basedir + "/docs/videos/user/%(unique_name)s" % record )
 #        except OSError:
 #           pass
         record = new_video(**record)
