@@ -2,13 +2,15 @@
 
 import os.path
 
+basedir = "/srv/www/sites/bicker"
+hostdomain = "bicker"
 
-import sys ; sys.path.append("/srv/www/sites/bicker.kamaelia.org/cgi/app/Facilitate")
+import sys ; sys.path.append(basedir +"/cgi/app/Facilitate")
 import CookieJar
 
 from model.Record import EntitySet
 
-EntitySet.data = "/srv/www/sites/bicker.kamaelia.org/cgi/app/data"
+EntitySet.data = basedir + "/cgi/app/data"
 
 Registrations = EntitySet("registrations", key="regid")
 Videos        = EntitySet("videos", key="imageid")
@@ -41,7 +43,7 @@ def loggedIn(env):
         return False
 
 upload_form = """\
-<form action="http://bicker.kamaelia.org/cgi-bin/app/videos" method="POST"
+<form action="http://%(hostdomain)s/cgi-bin/app/videos" method="POST"
 enctype="multipart/form-data">
 <input type="hidden" name="action" value="upload" />
 
@@ -52,7 +54,7 @@ Upload file: <input type="file" name="upload.filename" value="" size="30"/>
 <b> Please note - after you hit submit the amount of time taken to upload
 may be significant - at least a few minutes, or maybe 15 minutes (or more)
 for many video files. Please be patient!</b>
-"""
+""" % { "hostdomain" : hostdomain }
 
 playerscript = """\
 <script type="text/javascript" src="/flvplayer/swfobject.js"></script>
@@ -60,12 +62,12 @@ playerscript = """\
 <script type="text/javascript">
     var flashvars = {};
                 // The following 3 things should change for the content
-                flashvars.contentpath = "http://bicker.kamaelia.org/%(path_to_player)s";
+                flashvars.contentpath = "http://%(hostdomain)s/%(path_to_player)s";
                 flashvars.video = "%(filename)s";
                 flashvars.preview = "%(preview)s";
 
                 // Following needs to change for other sites
-                flashvars.playerpath = "http://bicker.kamaelia.org/flvplayer";
+                flashvars.playerpath = "http://%(hostdomain)s/flvplayer";
 
                 // You could change these. I wouldn't, but you could.
                 flashvars.skin = "skin-applestyle.swf";
@@ -142,6 +144,7 @@ class tagHandler(object):
              "path_to_player" : "videos/user/",
              "filename" : bunch.get("video", text)+".flv",
              "preview" : "preview.jpg",
+             "hostdomain" : hostdomain,
           }
           env["context"]["video.headeritems"] = playerscript % args
           return player

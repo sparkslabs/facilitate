@@ -2,12 +2,15 @@
 
 import os.path
 
-import sys ; sys.path.append("/srv/www/sites/bicker.kamaelia.org/cgi/app/Facilitate")
+basedir = "/srv/www/sites/bicker"
+hostdomain = "bicker"
+
+import sys ; sys.path.append(basedir+"/cgi/app/Facilitate")
 import CookieJar
 
 from model.Record import EntitySet
 
-EntitySet.data = "/srv/www/sites/bicker.kamaelia.org/cgi/app/data"
+EntitySet.data = basedir + "/cgi/app/data"
 
 Images        = EntitySet("images", key="imageid")
 Registrations = EntitySet("registrations", key="regid")
@@ -41,7 +44,7 @@ def loggedIn(env):
         return False
 
 upload_form = """\
-<form action="http://bicker.kamaelia.org/cgi-bin/app/images" method="POST"
+<form action="http://%(hostdomain)s/cgi-bin/app/images" method="POST"
 enctype="multipart/form-data">
 <input type="hidden" name="action" value="upload" />
 
@@ -55,7 +58,7 @@ may be significant - at least a few minutes. For very hi resoultion images,
 it may be as much as 10-15 minutes. Please be patient!</b>
 
 
-"""
+""" % { "hostdomain" : hostdomain }
 
 class tagHandler(object):
       def doUploadForm(bunch, text, env):
@@ -169,14 +172,16 @@ class tagHandler(object):
                 <p> &nbsp;
                 </p></div>
                 <div class="column sixC lightgrey">
-<img src="http://bicker.kamaelia.org/images/user/%(image)s/normal.jpg">
+<img src="http://%(hostdomain)s/images/user/%(image)s/normal.jpg">
                 </div>
                 <div class="column last oneC">
                 <p> &nbsp;
 
                 </p></div>
 <div class="divide"></div>
-""" % { "image" : image }
+""" % { "image" : image, 
+        "hostdomain" : hostdomain,
+      }
 
       mapping = {
            "onepictureviewer" : doOnePictureViewer,

@@ -5,17 +5,6 @@
 import os
 import cgi
 
-# import sys ; sys.path.append("/srv/www/sites/bicker.kamaelia.org/cgi/app/")
-# import CookieJar
-# 
-# from model.Record import EntitySet
-# 
-# EntitySet.data = "/srv/www/sites/bicker.kamaelia.org/cgi/app/data"
-# Registrations = EntitySet("registrations", key="regid")
-# Contacts      = EntitySet("contacts", key="contactid")
-# 
-# def set_cookie(env, thecookie, value):
-#     env["context"]["newcookies"][thecookie] = value
 import pprint
 
 def get_url_args(env):
