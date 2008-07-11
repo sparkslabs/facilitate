@@ -7,7 +7,7 @@ Registrations = None
 Contacts      = None
 
 def initApi(basedir):
-    EntitySet.data = basedir + "/cgi/app/data"
+    EntitySet.data = basedir
 
     global Images
     global Registrations
