@@ -22,7 +22,7 @@ Upload file: <input type="file" name="upload.filename" value="" size="30"/>
 
 <input type="submit" value="submit" />
 
-/form><br>
+</form><br>
 <b> Please note - after you hit submit the amount of time taken to upload
 may be significant - at least a few minutes. For very hi resoultion images,
 it may be as much as 10-15 minutes. Please be patient!</b>
