@@ -25,9 +25,12 @@ def getRegistration(userid):
     return user
 
 def ContactsImages(contacts):
+#    raise repr(contacts)
     images = Images.read_database()
     user_images = []
+    userids = []
     for image in images:
+        userids.append(image["userid"])
         if image["userid"] in contacts:
             user_images.append(image)
     return user_images
@@ -35,7 +38,7 @@ def ContactsImages(contacts):
 def getContacts(userid):
     for rec in Contacts.read_database():
         if rec["contactof"] == userid:
-            return rec
+            return rec["contacts"]
     else:
         return None
 
@@ -183,7 +186,7 @@ class tagHandler(object):
           if not contacts:
               return "Sorry - I can't show you any images from your friends - maybe you haven't added any contacts?"
 
-          user_images = ContactsImages(userid, contacts)
+          user_images = ContactsImages(contacts)
           if user_images == []:
               return "Your friends haven't uploaded any images yet! Get them to do something!"
 
