@@ -22,7 +22,6 @@ def getRegistration(userid):
     return user
 
 def ContactsImages(contacts):
-#    raise repr(contacts)
     images = Images.read_database()
     user_images = []
     userids = []
@@ -53,26 +52,8 @@ def getUserImages(userid):
 def getAllUsers():
     return Registrations.read_database()
 
-
 def getRegistrations(users):
     R = []
     for user in users:
-        R.append(getRegistration(contactid))
+        R.append(getRegistration(user))
     return R
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
