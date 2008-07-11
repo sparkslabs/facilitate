@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import os.path
-import CDML.Page
+import Cerenity.CDML.Page
 
 def get_cookie(thecookie, env):
     value = env["cookies"][thecookie].value
