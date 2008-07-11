@@ -21,20 +21,22 @@ class CDML(object):
     def getModules(self, path = None):
         if path == None:
             path = Cerenity.__path__[0]+"/CDML/Handlers"
+#            raise repr(Cerenity.__path__)
         handlers = []
         for x in os.listdir(path):
             if x[-3:] ==".py" and x !="__init__.py":
                 handlers.append(x[:-3])
-        modules =  [ __import__("CDML.Handlers."+ str(H),[],[],[""]) for H in handlers ]
+        modules =  [ __import__("Cerenity.CDML.Handlers."+ str(H),[],[],[""]) for H in handlers ]
 
         handlers = []
-        for app in os.listdir("CDML/Apps/"):
-            if not os.path.isdir("CDML/Apps/"+app+"/"):
+        AppsBase = Cerenity.__path__[0]+"/Apps"
+        for app in os.listdir(AppsBase):
+            if not os.path.isdir(AppsBase+"/"+app+"/"):
                 continue
-            for x in os.listdir("CDML/Apps/"+app+"/"):
+            for x in os.listdir(AppsBase+"/"+app+"/"):
                if x[-3:] ==".py" and x !="__init__.py":
                    handlers.append((app,x[:-3]))
-        modules = modules + [ __import__("CDML.Apps."+ str(app)+"."+str(H),
+        modules = modules + [ __import__("Cerenity.Apps."+ str(app)+"."+str(H),
                                          [],[],[""]) for app, H in handlers ]
         return modules
 
@@ -91,7 +93,7 @@ class CDML(object):
 
 
 X = CDML({})
-modules = X.getModules("CDML/Handlers")
+modules = X.getModules() # "CDML/Handlers")
 X.addHandlers(CDML.CDML_TAGS, modules)
 
 # evalTree = X.evalTree
