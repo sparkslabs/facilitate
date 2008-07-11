@@ -2,61 +2,12 @@
 
 import os.path
 
+import Facilitate.CookieJar as CookieJar
+from Facilitate.Api import getRegistration, ContactsImages, getContacts, getAllImages, getUserImages, initApi
+
 basedir = "/srv/www/sites/bicker"
 hostdomain = "bicker"
-
-import Facilitate.CookieJar as CookieJar
-# from Facilitate.model.Record import EntitySet
-
-from Faciliate.Api import getRegistration, ContactsImages, getContacts, getAllImages, getUserImages, initApi
-
 initApi(basedir + "/cgi/app/data")
-
-# -- START OF MODEL RELATED STUFF-------------------------------------------------
-
-#  This stuff should be in Facilitate.* and private
-#  EntitySet.data = basedir + "/cgi/app/data"
-# 
-# Images        = EntitySet("images", key="imageid")
-# Registrations = EntitySet("registrations", key="regid")
-# Contacts      = EntitySet("contacts", key="contactid")
-
-#  This stuff should be in Facilitate.* and public
-if 0
-    def getRegistration(userid):
-        user = Registrations.get_record(userid)
-        return user
-
-    def ContactsImages(contacts):
-    #    raise repr(contacts)
-        images = Images.read_database()
-        user_images = []
-        userids = []
-        for image in images:
-            userids.append(image["userid"])
-            if image["userid"] in contacts:
-                user_images.append(image)
-        return user_images
-
-    def getContacts(userid):
-        for rec in Contacts.read_database():
-            if rec["contactof"] == userid:
-                return rec["contacts"]
-        else:
-            return None
-
-    def getAllImages():
-        return Images.read_database()
-
-    def getUserImages(userid):
-        images = Images.read_database()
-        user_images = []
-        for image in images:
-            if image["userid"] == userid:
-                user_images.append(image)
-        return user_images
-
-# --END OF MODEL RELATED STUFF-------------------------------------------------
 
 #
 # -- These really need to be seperated out elsewhere, but here is better than inline.
