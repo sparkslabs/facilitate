@@ -4,7 +4,7 @@ import anydbm
 import smtplib
 import time
 import math
-from CDML.Page import pageExists
+from Cerenity.CDML.Page import pageExists
 
 # = EMAIL ===================
 
