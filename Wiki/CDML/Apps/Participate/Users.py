@@ -1,10 +1,9 @@
 #!/usr/bin/env python
 
 import os.path
-import sys ; sys.path.append("/srv/www/sites/bicker/cgi/app/Facilitate")
-import CookieJar
 
-from model.Record import EntitySet
+import Facilitate.CookieJar as CookieJar
+from Facilitate.model.Record import EntitySet
 
 EntitySet.data = "/srv/www/sites/bicker/cgi/app/data"
 Registrations = EntitySet("registrations", key="regid")

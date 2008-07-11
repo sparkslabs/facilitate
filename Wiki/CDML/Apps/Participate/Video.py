@@ -5,10 +5,8 @@ import os.path
 basedir = "/srv/www/sites/bicker"
 hostdomain = "bicker"
 
-import sys ; sys.path.append(basedir +"/cgi/app/Facilitate")
-import CookieJar
-
-from model.Record import EntitySet
+import Facilitate.CookieJar as CookieJar
+from Facilitate.model.Record import EntitySet
 
 EntitySet.data = basedir + "/cgi/app/data"
 
