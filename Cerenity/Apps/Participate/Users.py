@@ -3,37 +3,14 @@
 import os.path
 
 import Facilitate.CookieJar as CookieJar
-from Facilitate.Api import getRegistration, getAllUsers, getRegistrations
+from Facilitate.Api import getRegistration, getAllUsers, getRegistrations, getContacts, initApi
 
-#, ContactsImages, getContacts, getAllImages, getUserImages, initApi
-
-
-# initApi("/srv/www/sites/bicker/cgi/app/data")
-
-def getAllUsers():
-    return Registrations.read_database()
-
-
-def getRegistrations(users):
-    R = []
-    for user in users:
-        R.append(getRegistration(contactid))
-    return R
-
-
-from Facilitate.model.Record import EntitySet
-
-EntitySet.data = "/srv/www/sites/bicker/cgi/app/data"
-
-Registrations = EntitySet("registrations", key="regid")
-Contacts      = EntitySet("contacts", key="contactid")
+initApi("/srv/www/sites/bicker/cgi/app/data")
 
 def set_cookie(env, thecookie, value):
     env["context"]["newcookies"][thecookie] = value
 
 loggedout = False
-
-
 
 def loggedIn(env):
     if loggedout:
