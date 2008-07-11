@@ -50,3 +50,29 @@ def getUserImages(userid):
             user_images.append(image)
     return user_images
 
+def getAllUsers():
+    return Registrations.read_database()
+
+
+def getRegistrations(users):
+    R = []
+    for user in users:
+        R.append(getRegistration(contactid))
+    return R
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

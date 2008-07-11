@@ -1,11 +1,30 @@
-#!/usr/bin/env python
+#!/usr/bin/env python5~
 
 import os.path
 
 import Facilitate.CookieJar as CookieJar
+from Facilitate.Api import getRegistration, getAllUsers, getRegistrations
+
+#, ContactsImages, getContacts, getAllImages, getUserImages, initApi
+
+
+# initApi("/srv/www/sites/bicker/cgi/app/data")
+
+def getAllUsers():
+    return Registrations.read_database()
+
+
+def getRegistrations(users):
+    R = []
+    for user in users:
+        R.append(getRegistration(contactid))
+    return R
+
+
 from Facilitate.model.Record import EntitySet
 
 EntitySet.data = "/srv/www/sites/bicker/cgi/app/data"
+
 Registrations = EntitySet("registrations", key="regid")
 Contacts      = EntitySet("contacts", key="contactid")
 
@@ -13,6 +32,8 @@ def set_cookie(env, thecookie, value):
     env["context"]["newcookies"][thecookie] = value
 
 loggedout = False
+
+
 
 def loggedIn(env):
     if loggedout:
@@ -33,7 +54,7 @@ def loggedIn(env):
     except CookieJar.NoSuchUser:
         return False
 
-    user = Registrations.get_record(userid)
+    user = getRegistration(userid)
     if user["confirmed"]:
         return userid
     else:
@@ -48,7 +69,7 @@ class tagHandler(object):
       def doDumpProfile(bunch, text, env):
           userid = loggedIn(env)
           if userid:
-              user = Registrations.get_record(userid)
+              user = getRegistration(userid)
               return repr(user)
           else:
               return "No Profile"
@@ -67,14 +88,14 @@ class tagHandler(object):
           userid = loggedIn(env)
           if not userid:
               return "NOT LOGGED IN"
-          user = Registrations.get_record(userid)
+          user = getRegistration(userid)
           return user['screenname']
 
       def dodob(bunch, text, env):
           userid = loggedIn(env)
           if not userid:
               return ""
-          user = Registrations.get_record(userid)
+          user = getRegistration(userid)
           return user['dob.day']+" "+user['dob.month']+" "+user['dob.year']
 
       def doparticipateside(bunch, text, env):
@@ -82,7 +103,7 @@ class tagHandler(object):
           userid = loggedIn(env)
           if not userid:
               return ""
-          user = Registrations.get_record(userid)
+          user = getRegistration(userid)
           if cap:
               return user['side'].capitalize()
           else:
@@ -92,7 +113,7 @@ class tagHandler(object):
           userid = loggedIn(env)
           if not userid:
               return ""
-          user = Registrations.get_record(userid)
+          user = getRegistration(userid)
           return user['email']
 
       def dohandlelogout(bunch, text, env):
@@ -106,7 +127,7 @@ class tagHandler(object):
           return ""
 
       def doparticipantlist(bunch, text, env):
-          participants = Registrations.read_database()
+          participants = getAllUsers()
           formatted_ps = ["<ul>"]
 
           if loggedIn(env):
@@ -134,15 +155,13 @@ class tagHandler(object):
       def dofriendslist(bunch, text, env):
           if loggedIn(env):
               myid = loggedIn(env)
-              for rec in Contacts.read_database():
-                  if rec["contactof"] == myid:
-                      break
-              else:
+
+              contacts = getContacts(myid)
+              if not contacts:
                   return text
 
               users = ["<ul>"]
-              for contactid in rec["contacts"]:
-                  user = Registrations.get_record(contactid)
+              for user in getRegistrations(contacts):
                   user["email"] = user["email"][user["email"].find("@")+1:]
                   users.append( "<li> <B>%(screenname)s</b> ( %(email)s )" % user )
               users.append("</ul>")
