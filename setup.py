@@ -11,6 +11,7 @@ setup(name = "Facilitate",
       license = "Copyright (c)2008 BBC ... License : ",
       packages = [\
                   "Facilitate",
+                  "Cerenity",
                   "Facilitate.model",
                   ""],
 #      scripts = [ "App/somescript" ],
