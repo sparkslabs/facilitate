@@ -26,7 +26,7 @@ import pprint
 import re
 from CDML.Page import getPage, getTemplate, storePage
 from CDML.xCDML import handleCDML
-from Facilitate.MimeDict import MimeDict
+from Cerenity.MimeDict import MimeDict
 from CDML.Defaults import context
 from Cookie import SimpleCookie
 
