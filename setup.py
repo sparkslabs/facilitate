@@ -11,6 +11,8 @@ setup(name = "Facilitate",
       license = "Copyright (c)2008 BBC ... License : ",
       packages = [\
                   "Cerenity",
+                  "Cerenity.Apps",
+                  "Cerenity.Apps.Participate",
                   "Cerenity.CDML",
                   "Cerenity.CDML.Apps",
                   "Cerenity.CDML.Apps.Participate",
