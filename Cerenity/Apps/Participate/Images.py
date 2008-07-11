@@ -8,11 +8,54 @@ hostdomain = "bicker"
 import Facilitate.CookieJar as CookieJar
 from Facilitate.model.Record import EntitySet
 
+
+
+# -- START OF MODEL RELATED STUFF-------------------------------------------------
+
+#  This stuff should be in Facilitate.* and private
 EntitySet.data = basedir + "/cgi/app/data"
 
 Images        = EntitySet("images", key="imageid")
 Registrations = EntitySet("registrations", key="regid")
 Contacts      = EntitySet("contacts", key="contactid")
+
+#  This stuff should be in Facilitate.* and public
+def getRegistration(userid):
+    user = Registrations.get_record(userid)
+    return user
+
+def ContactsImages(contacts):
+    images = Images.read_database()
+    user_images = []
+    for image in images:
+        if image["userid"] in contacts:
+            user_images.append(image)
+    return user_images
+
+def getContacts(userid):
+    for rec in Contacts.read_database():
+        if rec["contactof"] == userid:
+            return rec
+    else:
+        return None
+
+def getAllImages():
+    return Images.read_database()
+
+def getUserImages(userid):
+
+    images = Images.read_database()
+    user_images = []
+    for image in images:
+        if image["userid"] == userid:
+            user_images.append(image)
+    return user_images
+
+# --END OF MODEL RELATED STUFF-------------------------------------------------
+
+#
+# -- These really need to be seperated out elsewhere, but here is better than inline.
+#
 
 upload_form = """\
 <form action="http://%(hostdomain)s/cgi-bin/app/images" method="POST"
@@ -23,13 +66,35 @@ Upload file: <input type="file" name="upload.filename" value="" size="30"/>
 
 <input type="submit" value="submit" />
 
-</form><br>
+/form><br>
 <b> Please note - after you hit submit the amount of time taken to upload
 may be significant - at least a few minutes. For very hi resoultion images,
 it may be as much as 10-15 minutes. Please be patient!</b>
 
+"""
 
-""" % { "hostdomain" : hostdomain }
+image_template = """\
+<div class='column twoC%(extra)s button'>
+<a href="/Picture?image=%(unique_name)s">
+<img border="0" src='/images/user/%(unique_name)s/thumb.jpg'>
+</a></div>
+"""
+
+image_template_large = """\
+<div class="divide"></div>
+                <div class="column oneC">
+                <p> &nbsp;
+                </p></div>
+                <div class="column sixC lightgrey">
+<img src="http://%(hostdomain)s/images/user/%(image)s/normal.jpg">
+                </div>
+                <div class="column last oneC">
+                <p> &nbsp;
+
+                </p></div>
+<div class="divide"></div>
+"""
+
 
 loggedout = False
 
@@ -52,19 +117,21 @@ def loggedIn(env):
     except CookieJar.NoSuchUser:
         return False
 
-    user = Registrations.get_record(userid)
+    user = getRegistration(userid)
     if user["confirmed"]:
         return userid
     else:
         return False
 
 
+
 class tagHandler(object):
       def doUploadForm(bunch, text, env):
-          return upload_form
+          return upload_form % { "hostdomain" : hostdomain }
 
       def doAllUserImages(bunch, text, env):
-          user_images = Images.read_database()
+          
+          user_images = getAllImages()
           images = []
           i = 0
           for image in user_images:
@@ -73,26 +140,18 @@ class tagHandler(object):
                    image["extra"] = " last"
               else:
                    image["extra"] = ""
-              image = """\
-<div class='column twoC%(extra)s button'>
-<a href="/Picture?image=%(unique_name)s">
-<img border="0" src='/images/user/%(unique_name)s/thumb.jpg'>
-</a></div>
-""" % image
+              image = image_template % image
               if i % 4 == 0:
                   image += '<div class="divide"></div>'
               images.append(image)
           return "".join(images)+ '<div class="divide"></div>'
 
+
       def doUserImages(bunch, text, env):
           userid = loggedIn(env)
           if userid:
-              images = Images.read_database()
-              user_images = []
-              for image in images:
-                  if image["userid"] == userid:
-                      user_images.append(image)
-
+          
+              user_images = getUserImages(userid)
               if user_images == []:
                   return "You haven't uploaded any images yet! Why not?"
 
@@ -105,12 +164,8 @@ class tagHandler(object):
                        image["extra"] = " last"
                   else:
                        image["extra"] = ""
-                  image = """\
-<div class='column twoC%(extra)s button'>
-<a href="/Picture?image=%(unique_name)s">
-<img border="0" src='/images/user/%(unique_name)s/thumb.jpg'>
-</a></div>
-""" % image
+
+                  image = image_template % image
                   if i % 4 == 0:
                       image += '<div class="divide"></div>'
                   images.append(image)
@@ -119,33 +174,19 @@ class tagHandler(object):
           else:
               return "can't give you images, you're not logged in"
 
-
       def doFriendsImages(bunch, text, env):
           userid = loggedIn(env)
           if not userid:
               return "Can't show you your friends images - you're not logged in!"
 
-          for rec in Contacts.read_database():
-              if rec["contactof"] == userid:
-                  break
-          else:
+          contacts = getContacts(userid)
+          if not contacts:
               return "Sorry - I can't show you any images from your friends - maybe you haven't added any contacts?"
 
-          # userid contains the user
-          # rec["contacts"] contains the list of friend ids.
-
-          def ContactsImages(contacts):
-              images = Images.read_database()
-              user_images = []
-              for image in images:
-                  if image["userid"] in contacts:
-                      user_images.append(image)
-              return user_images
-
-          user_images = ContactsImages(rec["contacts"])
-
+          user_images = ContactsImages(userid, contacts)
           if user_images == []:
               return "Your friends haven't uploaded any images yet! Get them to do something!"
+
           images = []
           i = 0
           for image in user_images:
@@ -154,12 +195,7 @@ class tagHandler(object):
                    image["extra"] = " last"
               else:
                    image["extra"] = ""
-              image = """\
-<div class='column twoC%(extra)s button'>
-<a href="/Picture?image=%(unique_name)s">
-<img border="0" src='/images/user/%(unique_name)s/thumb.jpg'>
-</a></div>
-""" % image
+              image = image_template % image
               if i % 4 == 0:
                   image += '<div class="divide"></div>'
               images.append(image)
@@ -169,20 +205,7 @@ class tagHandler(object):
           image = bunch.get("image", text)
           if ".." in "image":
               return ""
-          return """\
-<div class="divide"></div>
-                <div class="column oneC">
-                <p> &nbsp;
-                </p></div>
-                <div class="column sixC lightgrey">
-<img src="http://%(hostdomain)s/images/user/%(image)s/normal.jpg">
-                </div>
-                <div class="column last oneC">
-                <p> &nbsp;
-
-                </p></div>
-<div class="divide"></div>
-""" % { "image" : image, 
+          return image_template_large  % { "image" : image, 
         "hostdomain" : hostdomain,
       }
 
@@ -201,22 +224,3 @@ if __name__ == "__main__":
    print "MAPPING", tagHandler.mapping
    print "HMM", tagHandler.mapping["w"]({"location":"bingle"}, "hello world", {})
 
-   if 0:
-          if loggedIn(env):
-              myid = loggedIn(env)
-              for rec in Contacts.read_database():
-                  if rec["contactof"] == myid:
-                      break
-              else:
-                  return text
-
-              users = ["<ul>"]
-              for contactid in rec["contacts"]:
-                  user = Registrations.get_record(contactid)
-                  user["email"] = user["email"][user["email"].find("@")+1:]
-                  users.append( "<li> <B>%(screenname)s</b> ( %(email)s )" % user )
-              users.append("</ul>")
-              
-              return "\n".join(users)
-          else:
-              return "Sorry, in order to have a contact/friends list, you must be logged in!"
