@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-from MimeDict import MimeDict
+from Cerenity.MimeDict import MimeDict
 import os
 import glob
 
