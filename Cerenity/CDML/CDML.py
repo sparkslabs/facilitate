@@ -9,6 +9,8 @@ ENV = {}
 def noTag(bunch, text, env):
    return text
 
+import Cerenity
+
 class CDML(object):
     CDML_TAGS = {}
     CDML_TYPES = {}
@@ -16,7 +18,9 @@ class CDML(object):
     def __init__(self, config):
         self.config = config
 
-    def getModules(self, path = "CDML/Handlers"):
+    def getModules(self, path = None):
+        if path == None:
+            path = Cerenity.__path__[0]+"/CDML/Handlers"
         handlers = []
         for x in os.listdir(path):
             if x[-3:] ==".py" and x !="__init__.py":
