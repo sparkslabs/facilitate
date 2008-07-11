@@ -24,10 +24,10 @@ import cgi
 import sys
 import pprint
 import re
-from CDML.Page import getPage, getTemplate, storePage
-from CDML.xCDML import handleCDML
+from Cerenity.CDML.Page import getPage, getTemplate, storePage
+from Cerenity.CDML.xCDML import handleCDML
 from Cerenity.MimeDict import MimeDict
-from CDML.Defaults import context
+from Cerenity.CDML.Defaults import context
 from Cookie import SimpleCookie
 
 default = context["defaultpage"]
