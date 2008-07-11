@@ -14,6 +14,23 @@ Images        = EntitySet("images", key="imageid")
 Registrations = EntitySet("registrations", key="regid")
 Contacts      = EntitySet("contacts", key="contactid")
 
+upload_form = """\
+<form action="http://%(hostdomain)s/cgi-bin/app/images" method="POST"
+enctype="multipart/form-data">
+<input type="hidden" name="action" value="upload" />
+
+Upload file: <input type="file" name="upload.filename" value="" size="30"/>
+
+<input type="submit" value="submit" />
+
+</form><br>
+<b> Please note - after you hit submit the amount of time taken to upload
+may be significant - at least a few minutes. For very hi resoultion images,
+it may be as much as 10-15 minutes. Please be patient!</b>
+
+
+""" % { "hostdomain" : hostdomain }
+
 loggedout = False
 
 def loggedIn(env):
@@ -41,22 +58,6 @@ def loggedIn(env):
     else:
         return False
 
-upload_form = """\
-<form action="http://%(hostdomain)s/cgi-bin/app/images" method="POST"
-enctype="multipart/form-data">
-<input type="hidden" name="action" value="upload" />
-
-Upload file: <input type="file" name="upload.filename" value="" size="30"/>
-
-<input type="submit" value="submit" />
-
-</form><br>
-<b> Please note - after you hit submit the amount of time taken to upload
-may be significant - at least a few minutes. For very hi resoultion images,
-it may be as much as 10-15 minutes. Please be patient!</b>
-
-
-""" % { "hostdomain" : hostdomain }
 
 class tagHandler(object):
       def doUploadForm(bunch, text, env):
@@ -133,11 +134,14 @@ class tagHandler(object):
           # userid contains the user
           # rec["contacts"] contains the list of friend ids.
 
-          images = Images.read_database()
-          user_images = []
-          for image in images:
-              if image["userid"] in rec["contacts"]:
-                  user_images.append(image)
+          def ContactsImages(contacts):
+              images = Images.read_database()
+              user_images = []
+              for image in images:
+                  if image["userid"] in contacts:
+                      user_images.append(image)
+
+          user_images = ContactsImages(rec["contacts"])
 
           if user_images == []:
               return "Your friends haven't uploaded any images yet! Get them to do something!"
