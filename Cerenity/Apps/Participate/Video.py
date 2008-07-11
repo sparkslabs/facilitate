@@ -9,11 +9,6 @@ basedir = "/srv/www/sites/bicker"
 hostdomain = "bicker"
 initApi(basedir + "/cgi/app/data")
 
-#from Facilitate.model.Record import EntitySet
-#
-#EntitySet.data = basedir + "/cgi/app/data"
-#
-# Videos        = EntitySet("videos", key="imageid")
 
 loggedout = False
 
