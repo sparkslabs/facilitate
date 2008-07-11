@@ -140,6 +140,7 @@ class tagHandler(object):
               for image in images:
                   if image["userid"] in contacts:
                       user_images.append(image)
+              return user_images
 
           user_images = ContactsImages(rec["contacts"])
 
