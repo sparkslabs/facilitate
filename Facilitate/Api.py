@@ -5,6 +5,7 @@ from Facilitate.model.Record import EntitySet
 Images        = None
 Registrations = None
 Contacts      = None
+Videos        = None
 
 def initApi(basedir):
     EntitySet.data = basedir
@@ -12,10 +13,12 @@ def initApi(basedir):
     global Images
     global Registrations
     global Contacts
+    global Videos
 
     Images        = EntitySet("images", key="imageid")
     Registrations = EntitySet("registrations", key="regid")
     Contacts      = EntitySet("contacts", key="contactid")
+    Videos        = EntitySet("videos", key="imageid")
 
 def getRegistration(userid):
     user = Registrations.get_record(userid)
@@ -57,3 +60,14 @@ def getRegistrations(users):
     for user in users:
         R.append(getRegistration(user))
     return R
+
+def getUserVideos(userid):
+    videos = Videos.read_database()
+    user_videos = []
+    for video in videos:
+        if video["userid"] == userid:
+            user_videos.append(video)
+    return user_videos
+
+
+

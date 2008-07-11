@@ -2,16 +2,18 @@
 
 import os.path
 
+import Facilitate.CookieJar as CookieJar
+from Facilitate.Api import getRegistration, getUserVideos, initApi # , getContacts
+
 basedir = "/srv/www/sites/bicker"
 hostdomain = "bicker"
+initApi(basedir + "/cgi/app/data")
 
-import Facilitate.CookieJar as CookieJar
-from Facilitate.model.Record import EntitySet
-
-EntitySet.data = basedir + "/cgi/app/data"
-
-Registrations = EntitySet("registrations", key="regid")
-Videos        = EntitySet("videos", key="imageid")
+#from Facilitate.model.Record import EntitySet
+#
+#EntitySet.data = basedir + "/cgi/app/data"
+#
+# Videos        = EntitySet("videos", key="imageid")
 
 loggedout = False
 
@@ -34,7 +36,7 @@ def loggedIn(env):
     except CookieJar.NoSuchUser:
         return False
 
-    user = Registrations.get_record(userid)
+    user = getRegistration(userid)    
     if user["confirmed"]:
         return userid
     else:
@@ -119,11 +121,7 @@ class tagHandler(object):
           userid = loggedIn(env)
 
           if userid:
-              videos = Videos.read_database()
-              user_videos = []
-              for video in videos:
-                  if video["userid"] == userid:
-                      user_videos.append(video)
+              user_videos = getUserVideos(userid) 
               Y = [ x["unique_name"] for x in user_videos]
               videos = ["<ul>"]
               import pprint
@@ -161,25 +159,3 @@ if __name__ == "__main__":
    print "TAG HANDLER", tagHandler
    print "MAPPING", tagHandler.mapping
    print "HMM", tagHandler.mapping["w"]({"location":"bingle"}, "hello world", {})
-
-
-
-   if 0:
-          if loggedIn(env):
-              myid = loggedIn(env)
-              for rec in Contacts.read_database():
-                  if rec["contactof"] == myid:
-                      break
-              else:
-                  return text
-
-              users = ["<ul>"]
-              for contactid in rec["contacts"]:
-                  user = Registrations.get_record(contactid)
-                  user["email"] = user["email"][user["email"].find("@")+1:]
-                  users.append( "<li> <B>%(screenname)s</b> ( %(email)s )" % user )
-              users.append("</ul>")
-              
-              return "\n".join(users)
-          else:
-              return "Sorry, in order to have a contact/friends list, you must be logged in!"
