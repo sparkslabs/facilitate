@@ -301,7 +301,33 @@ class tagHandler(object):
 for="eve">Eve</label> </div>
 """
 
+      def domultichoice(bunch, text, env):
+          name = bunch.get("name", None)
+          options = env.get("participate.inputs.options", None)
+          if (options is None) or (name is None):
+              return text
+          R = []
+          item_template = """\
+<input type="radio" id="%(value)s" name="%(name)s" value="%(value)s"><label for="%(value)s"> %(text)s </label>"""
+          
+          for i in range(len(options)):
+               value, label = options[i]
+               html = item_template % { "name" : name, "value": value, "text": label }
+               text = text.replace("OPTION"+repr(i+1), html)
+          env["participate.inputs.options"] = []
+          return text
+
+
+      def dooption(bunch, text, env):
+          options = env.get("participate.inputs.options", [])
+          label = bunch.get("label", None)
+          options.append((label, text))
+          env["participate.inputs.options"] = options
+          return "OPTION"+repr(len(options))
+
       mapping = {
+                 "option" : dooption,
+                 "multiplechoice" : domultichoice,
                  "textinput" : dotextinput,
                  "passinput" : dopasswordinput,
                  "submitinput" : dosubmitinput,
