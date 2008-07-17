@@ -123,3 +123,9 @@ video_uploadok = head + """\
 <P> <a href="/MyProfile"> Go back to your profile </a>
 <P> You could of course also go back <a href="/Home">Home</a>.
 """ + foot
+
+thankyou_template = head + """
+<P> Thanks you, done!
+<a href="/MyProfile"> click here to go to your profile! </a>
+<P> You could of course also go back <a href="/Home">Home</a>.
+""" + foot
