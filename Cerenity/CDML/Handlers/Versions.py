@@ -10,7 +10,7 @@ def get_cookie(thecookie, env):
 class tagHandler(object):
       def doShowRevision(bunch, text, env):
           "revisions"
-          X = CDML.Page._pageVersions(env["pagename"])
+          X = Cerenity.CDML.Page._pageVersions(env["pagename"])
           return text + str(X)
 
       def doShowVersions(bunch, text, env):
@@ -24,7 +24,7 @@ class tagHandler(object):
               linktoself = linktoself[:linktoself.find("?")] # linktoself +"?" #+ 
           else:
               result.append( '<a href="%s"> %s </a> ' % (linktoself, "current") )
-          X = CDML.Page._pageVersions(env["docbase"], env["pagename"])
+          X = Cerenity.CDML.Page._pageVersions(env["docbase"], env["pagename"])
           for version in xrange(1, X+1):
               versionlink = "version=%s" % str(version)
               if "?" in linktoself:
@@ -49,8 +49,8 @@ class tagHandler(object):
 
       def versionInfo(bunch, text, env):
           "linktoself"
-          X = CDML.Page._pageVersions(env["pagename"])
-          editor = CDML.Page._pageEditor(env["pagename"], env["pageversion"])
+          X = Cerenity.CDML.Page._pageVersions(env["pagename"])
+          editor = Cerenity.CDML.Page._pageEditor(env["pagename"], env["pageversion"])
           userdetails = editor + "UNDEFINED AS YET..."
 
 
