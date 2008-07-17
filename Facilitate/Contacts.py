@@ -12,44 +12,6 @@ import Cookie
 from model.Record import EntitySet  # For access to the temporary DB
 import Interstitials
 
-
-def new_contacts(**argd):
-    rec = {
-      # --------------------------------------------------------- Required to create a new record
-        'dob.day'          : argd.get("dob.day", ""),
-        'dob.month'        : argd.get("dob.month", ""),
-        'dob.year'         : argd.get("dob.year", ""),
-        'email'            : argd.get("email", ""),
-        'password'         : argd.get("password", ""),
-        'passwordtwo'      : argd.get("passwordtwo", ""),
-        'screenname'       : argd.get("screenname", ""),
-        'side'             : argd.get("side", ""),
-    }
-    # --------------------------------------------------------- Sprinkle with default metadata
-    rec["confirmed"] = False
-    rec["confirmationcode"] = generate_confirmation_code()
-    rec["personrecord"] = ""
-
-    # -------------------------------------------- Validations... (lots of these)
-
-    validate_record(rec) # Seperated out to a seperate function to make logic clearer
-
-    # ---------------------------------------------------------  TRANSFORMS FOR STORAGE
-    #    One way hash for security reasons before storage
-    #    NOTE: This means we always check the digest, not the value
-    #          This also means we can do a password reset, not a password reminder
-    #
-    if rec["password"] != "":
-        rec["password"] = md5.md5(rec["password"]).hexdigest()
-
-    if rec["passwordtwo"] != "":
-        rec["passwordtwo"] = md5.md5(rec["passwordtwo"]).hexdigest()
-
-    # --------------------------------------------------------- Actual storage
-    stored_rec = Registrations.new_record(rec)
-    return stored_rec
-
-
 def page_logic(json, **argd):
     if argd.get("action", "") == "addcontact":
         contact   = argd.get("contact", None)
