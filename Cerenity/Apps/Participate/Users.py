@@ -51,6 +51,13 @@ class tagHandler(object):
           else:
               return "No Profile"
 
+      def douserid(bunch, text, env):
+          userid = loggedIn(env)
+          if userid:
+              return userid
+          else:
+              return ""
+
       def doLoggedIn(bunch, text, env):
           if loggedIn(env):
               return text
@@ -159,6 +166,7 @@ class tagHandler(object):
            "handlelogout" : dohandlelogout,
            "participantlist" : doparticipantlist,
            "friendslist" : dofriendslist,
+           "userid" : douserid,
       }
 
       
