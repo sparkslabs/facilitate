@@ -26,6 +26,17 @@ class tagHandler(object):
           
           return R
 
+      def dotextareainput(bunch, text, env):
+          "textareainput"
+          name = bunch.get("name", "")
+          if name == "":
+              return "textareainput needs a name..."
+          R = """<textarea rows="5" cols="60" name="%(name)s">
+
+</textarea>""" % { "name" : name }
+
+          return R
+
       def dohiddeninput(bunch, text, env):
           "textinput"
           name = bunch.get("name", "")
@@ -336,6 +347,7 @@ for="eve">Eve</label> </div>
                  "hiddeninput" : dohiddeninput,
                  "datespinner": dodatespinner,
                  "doradiobuttons" : doradiobutton,
+                 "textareainput" : dotextareainput,
      }
       
 mapping = tagHandler.mapping
