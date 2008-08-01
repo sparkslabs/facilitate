@@ -14,7 +14,7 @@ print """
 
 import os
 
-basedir = "/srv/www/sites/bicker"
+basedir = "/srv/www/sites/bicker.kamaelia.org"
 
 for image in os.listdir(basedir + "/moderate/images/"):
     files = os.listdir(basedir + "/moderate/images/"+image)
