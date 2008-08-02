@@ -12,7 +12,7 @@ import Cookie
 from model.Record import EntitySet  # For access to the temporary DB
 import Interstitials
 
-hostdomain = "bicker"
+hostdomain = "bicker.kamaelia.org"
 
 def generate_confirmation_code():
     return md5.md5(str(random.randint(100000000000,1000000000000))).hexdigest()

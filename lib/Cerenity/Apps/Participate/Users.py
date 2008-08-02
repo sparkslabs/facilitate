@@ -5,7 +5,7 @@ import os.path
 import Facilitate.CookieJar as CookieJar
 from Facilitate.Api import getRegistration, getAllUsers, getRegistrations, getContacts, initApi
 
-initApi("/srv/www/sites/bicker/cgi/app/data")
+initApi("/srv/www/sites/bicker.kamaelia.org/cgi/app/data")
 
 def set_cookie(env, thecookie, value):
     env["context"]["newcookies"][thecookie] = value

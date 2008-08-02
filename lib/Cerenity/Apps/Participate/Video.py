@@ -5,8 +5,8 @@ import os.path
 import Facilitate.CookieJar as CookieJar
 from Facilitate.Api import getRegistration, getUserVideos, initApi # , getContacts
 
-basedir = "/srv/www/sites/bicker"
-hostdomain = "bicker"
+basedir = "/srv/www/sites/bicker.kamaelia.org"
+hostdomain = "bicker.kamaelia.org"
 initApi(basedir + "/cgi/app/data")
 
 

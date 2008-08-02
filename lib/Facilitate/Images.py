@@ -15,7 +15,7 @@ import CookieJar
 
 from model.Record import EntitySet  # For access to the temporary DB
 import Interstitials
-basedir = "/srv/www/sites/bicker"
+basedir = "/srv/www/sites/bicker.kamaelia.org"
 
 def new_image(**argd):
     rec = {

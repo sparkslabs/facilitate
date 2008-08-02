@@ -12,7 +12,7 @@ smtpuser = ''  # for SMTP AUTH, set SMTP username here
 smtppass = ''  # for SMTP AUTH, set SMTP password here
 
 smtpserver = "127.0.0.1"
-HOSTDOMAIN = "bicker"
+HOSTDOMAIN = "bicker.kamaelia.org"
 SENDER = 'do_not_reply@' + HOSTDOMAIN
 
 # ----------------------------------------------------------------------------------------
