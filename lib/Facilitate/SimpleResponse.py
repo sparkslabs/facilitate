@@ -33,7 +33,7 @@ def page_logic(json, **argd):
                       "error",
                       {
                         "message" : "Response type not set, did something go wrong?",
-                        "record" : "",
+                        "record" : "",        
                         "problemfield" : "type",
                       }
                    ]
@@ -67,13 +67,14 @@ def page_logic(json, **argd):
         stored_rec = SimpleResponses.new_record(rec)
 
         return [ "responsestored",
-                 { "message" : "Thanks for the response, it's been safely stored!"
+                 { "message" : "Thanks for the response, it's been safely stored!",
+                   "rulematch" : "__default__"
                  }
                ]
 
     return [ 
              "__default__",  
-             { "message" : "Hello World"+pprint.pformat(argd),
+             { "message" : "Please don't send junk"+pprint.pformat(argd),
                "record" : {}
              }
            ]
