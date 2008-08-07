@@ -124,7 +124,9 @@ class SimpleResponseTest(unittest.TestCase):
         self.assertEqual( X[0], "responsestored")
         self.assertEqual( X[1]["rulematch"], "__default__")
 
-
+class ComplextResponses(unittest.TestCase):
+    def test_defaultResponse1(self):
+        self.fail("Now we have support for matching rules, we need to add that code in and handle updating")
 if __name__=="__main__":
     # Next line invokes voodoo magic that causes all the testcases above to run.
     unittest.main()
