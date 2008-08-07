@@ -310,6 +310,32 @@ class Test_Record_key(unittest.TestCase):
         "Record.key - returns the key for this entity"
         self.assertEqual(self.key, self.X.key() )
 
+class Test_Record_Zap(unittest.TestCase):
+    def setUp(self):
+        self.key = "personid"
+
+        Record.EntitySet.Zap(name="People", key=self.key)
+        self.X = Record.EntitySet(name="People", key=self.key)
+        
+    def test_repeatedZapAfterAddingResetsKeyToZero(self):
+        Record.EntitySet.Zap(name="People", key=self.key)
+        X = Record.EntitySet(name="People", key=self.key)
+
+        newrec1 = X.new_record( {"name": "alice",   "age": "30"} )
+
+        Record.EntitySet.Zap(name="People", key=self.key)
+        X = Record.EntitySet(name="People", key=self.key)
+        newrec2 = X.new_record( {"name": "alice",   "age": "30"} )
+
+        
+        Record.EntitySet.Zap(name="People", key=self.key)
+        X = Record.EntitySet(name="People", key=self.key)
+        newrec3 = X.new_record( {"name": "alice",   "age": "30"} )
+        
+        self.assertEqual( newrec1[self.key] , newrec2[self.key] )
+        self.assertEqual( newrec2[self.key] , newrec3[self.key] )
+        
+
 
 if __name__=="__main__":
     # Next line invokes voodoo magic that causes all the testcases above to run.
