@@ -315,39 +315,3 @@ if __name__=="__main__":
     # Next line invokes voodoo magic that causes all the testcases above to run.
     unittest.main()
       
-
-
-if 0:
-
-      if 1:
-#          # common tests
-#          rec_raw = [
-#                      {"name": "michael", "age": "34"},
-#                      {"name": "polina", "age": "35"},
-#                      {"name": "sam", "age": "5"},
-#                      {"name": "nat", "age": "4"},
-#                    ]
-#          recs_new = [ ]
-#
-#          for rec in rec_raw:
-#              newrec = X.new_record(rec)
-#              print newrec
-#              recs_new.append(newrec)
-#
-#          print recs_new
-#
-#          print recs_new[2]
-
-          recs_new[2]["name"] = "sam sparks"
-          X.store_record(recs_new[2])
-
-          print recs_new
-
-          record = X.get_record("3")
-
-          print "Record","3", record
-
-          for myrec in X.read_database():
-              print "R", myrec
-
-
