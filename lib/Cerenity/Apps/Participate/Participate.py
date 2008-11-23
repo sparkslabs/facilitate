@@ -101,15 +101,18 @@ class tagHandler(object):
       def dodivider(bunch, text, env):
           return """<div class='divide'></div>"""
       def dobutton(bunch, text, env):
-          colour = bunch.get("colour", bunch.get("color","darkred"))
-          return """
-<div class="button twoC %(color)s right largertext">
-%(text)s&nbsp;
-</div>
-<div class="twoC">
-&nbsp;
-</div>
-""" % { "text" : text, "color" : colour}
+          colour = bunch.get("colour", bunch.get("color","black"))
+          align =  bunch.get("align", "right")
+          klass =  bunch.get("class", "button")
+          columns = bunch.get("columns", "twoC")
+          if text == "":
+              text == "&nbsp;"
+          return """<div class="%(klass)s %(columns)s %(color)s %(align)s">%(text)s</div>""" % { "text" : text, 
+                                                                                                 "color" : colour,
+                                                                                                 "align" : align,
+                                                                                                 "klass" : klass,
+                                                                                                 "columns" : columns,
+                                                                                               }
 
       mapping = {
                  "leftpanel"      : doleftpanel,

@@ -15,7 +15,14 @@ def file_last_modified(docbase, file, force=True):
         f.close()
         items = file_str.split("\xff")
         for item in items:
-            (docbase, file, str_mtime ) = item.split("\0")
+#            X = item.split("\0")
+#            raise repr(X)
+            try:
+                (docbase, file, str_mtime ) = item.split("\0")
+            except ValueError, e:
+                continue
+#                X = item.split("\0")
+#                raise repr(X)
             stat_cache[(docbase, file)] = int(str_mtime)
       except IOError: # not yet cached :-)
          pass

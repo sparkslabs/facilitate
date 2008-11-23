@@ -1,11 +1,14 @@
 #!/usr/bin/python
 
 from Facilitate.model.Record import EntitySet
+from Facilitate.model.Rules import infer_response
 
 Images        = None
 Registrations = None
 Contacts      = None
 Videos        = None
+Responses     = None
+Rules         = None
 
 def initApi(basedir):
     EntitySet.data = basedir
@@ -14,11 +17,15 @@ def initApi(basedir):
     global Registrations
     global Contacts
     global Videos
+    global Responses
+    global Rules
 
     Images        = EntitySet("images", key="imageid")
     Registrations = EntitySet("registrations", key="regid")
     Contacts      = EntitySet("contacts", key="contactid")
     Videos        = EntitySet("videos", key="imageid")
+    Responses     = EntitySet("simpleresponses", key="responseid")
+    Rules         = EntitySet("rules", key="ruleid")
 
 def getRegistration(userid):
     user = Registrations.get_record(userid)
@@ -69,5 +76,11 @@ def getUserVideos(userid):
             user_videos.append(video)
     return user_videos
 
-
+def getMissionResponse(userid, mission):
+    responses = Responses.read_database()
+    rules     = Rules.read_database()
+    e = {}
+    e["userid"] = userid
+    e["mission"] = mission
+    return infer_response(responses, rules, e)
 

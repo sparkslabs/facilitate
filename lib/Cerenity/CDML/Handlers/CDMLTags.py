@@ -39,10 +39,32 @@ class tagHandler(object):
          "[[group] puts the text inside the box inside a table with no border ]"
          return "<table width='100%%' border='0'><tr><td>%s</td></tr></table>" % (text)
 
-      def doBoxRight(bunch, text, env):
+      def doPriorBoxRight(bunch, text, env):
          """[[boxright] text ] - Create a nice box, and puts it on the right hand side. Everything inside this tag is inside the box"""
 #         return "<table width='40%%' border='2' align='right'><tr><td>%s</td></tr></table>" % (text)
          return '</div> <div class="boxright">%s</div><div class="bodytext">' % (text)
+
+      def doBoxRight(bunch, text, env):
+         """[[boxright] text ] - Create a nice box, and puts it on the right hand side. Everything inside this tag is inside the box"""
+#         return "<table width='40%%' border='2' align='right'><tr><td>%s</td></tr></table>" % (text)
+         return """<div style="float: right; border: solid;" class="twoC">%s</div>""" % (text)
+
+      def doTwoCBoxRight(bunch, text, env):
+          """[[boxright] text ] - Create a nice box, and puts it on the right hand side. Everything inside this tag is inside the box"""
+#         return "<table width='40%%' border='2' align='right'><tr><td>%s</td></tr></table>" % (text)
+
+          panel = bunch.get("panel", "right")
+
+          CurrentPanelRight = env.get("participate.args.panels."+panel, "")
+          if CurrentPanelRight != "":
+             CurrentPanelRight = CurrentPanelRight + "<br>"
+
+          env["participate.args.panels."+panel] = CurrentPanelRight + text
+          if bunch.get("debug", False):
+               return "PANEL DONE "+"participate.args.panels."+panel+" "+text
+          return ""
+
+#         return '</div> <div class="boxright">%s</div><div class="bodytext">' % (text)
 
       def doOldBoxRight(bunch, text, env):
          "[[oldboxright] <text> ] Puts text is a not so nice box (table, not div) and that goes on the right"

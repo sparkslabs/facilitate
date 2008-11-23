@@ -86,16 +86,25 @@ def getTemplate(context):
     except KeyError:
        subtype = ""
 
+    stem = os.path.dirname(context["pagename"])
+
     try:
         # First of all, try page specific template
         f = open("templates/%s.%s.tmpl%s"% (context["pagename"],mode,subtype) )
     except IOError:
-        # Failed for some reason, so look for a locally customised template
+        # Can't find the page specific one. Is there a directory specific one?
+        #
+        # Note: We won't traverse the whole tree upwards, at least not yet.
+        #
         try:
-            f = open("templates/%s.tmpl%s"% (mode,subtype) )
+            f = open("templates/%s/%s.tmpl%s"% (stem,mode,subtype) )
         except IOError:
-            # OK, no page specific, or site specific template. Use the default instead.
-            f = open("templates/%s.tmpl.default%s" % (mode,subtype) )
+            # Failed for some reason, so look for a locally customised template
+            try:
+                f = open("templates/%s.tmpl%s"% (mode,subtype) )
+            except IOError:
+                # OK, no page specific, or site specific template. Use the default instead.
+                f = open("templates/%s.tmpl.default%s" % (mode,subtype) )
     template = f.read()
     f.close()
     return template

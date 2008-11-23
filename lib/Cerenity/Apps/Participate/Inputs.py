@@ -82,11 +82,21 @@ class tagHandler(object):
 
       def doform(bunch, text, env):
           "form"
-          form = """<form method="get" action="%(action)s" enctype="application/x-www-form-urlencoded">
+          klass = bunch.get("class", "")
+          formid = bunch.get("id", "")
+          if klass != "":
+              klass = "class='%s'" % klass
+
+          if formid:
+              formid = "id='%s'" % formid
+
+          form = """<form %(class)s %(formid)s method="get" action="%(action)s" enctype="application/x-www-form-urlencoded">
           %(text)s
           </form>
           """ % { "text" : text,
                   "action" : bunch.get("action", ""),
+                  "class" : klass,
+                  "formid" : formid,
                 }
           return form
 

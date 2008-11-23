@@ -83,7 +83,7 @@ playerscript = """\
                         attributes.align = "left";
 
         swfobject.embedSWF("/flvplayer/flvplayer.swf",
-                           "videoPlayer",
+                           "videoPlaceholder",
                            "466", "380",
                            "9.0.28",
                            "/flvplayer/expressInstall.swf",
@@ -94,7 +94,7 @@ playerscript = """\
 player = """\
 <div class="divide"></div>
         <div  class="column oneC"> &nbsp; </div>
-        <div id="videoPlayer" class="column sixC">
+        <div id="videoPlaceholder" class="column sixC">
             <p>This content requires the Adobe Flash Player.</p>
                 <p><a href="http://www.adobe.com/go/getflashplayer"><img src="http://www.adobe.com/images/shared/download_buttons/get_flash_player.gif" alt="Get Adobe Flash player" /></a>
             </p>
