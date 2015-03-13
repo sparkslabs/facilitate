@@ -1,0 +1,1 @@
+Facilitate is a project whose goal is to support the creation of tasks (missions) which people can then choose to undertake. These tasks/missions result in the creation of data artefacts which can be aggregated on a high level.
